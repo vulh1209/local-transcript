@@ -20,6 +20,7 @@
 		A1000013001 /* FloatingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013000 /* FloatingIndicator.swift */; };
 		A1000014001 /* FloatingIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000014000 /* FloatingIndicatorPanel.swift */; };
 		A1000015001 /* AudioFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000015000 /* AudioFeedback.swift */; };
+		A1000016001 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000016000 /* TranscriptionService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		A1000013000 /* FloatingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingIndicator.swift; sourceTree = "<group>"; };
 		A1000014000 /* FloatingIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingIndicatorPanel.swift; sourceTree = "<group>"; };
 		A1000015000 /* AudioFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeedback.swift; sourceTree = "<group>"; };
+		A1000016000 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 				A1000009000 /* ModelManager.swift */,
 				A1000011000 /* LaunchManager.swift */,
 				A1000012000 /* AudioRecorder.swift */,
+				A1000016000 /* TranscriptionService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -207,6 +210,7 @@
 				A1000013001 /* FloatingIndicator.swift in Sources */,
 				A1000014001 /* FloatingIndicatorPanel.swift in Sources */,
 				A1000015001 /* AudioFeedback.swift in Sources */,
+				A1000016001 /* TranscriptionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
