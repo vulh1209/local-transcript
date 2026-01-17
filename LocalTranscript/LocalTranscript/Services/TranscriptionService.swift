@@ -20,6 +20,7 @@ class TranscriptionService {
 
     private let audioRecorder: AudioRecorder
     private let modelManager: ModelManager
+    private let textInsertionService = TextInsertionService()
     private var floatingPanel: FloatingIndicatorPanel?
 
     init(audioRecorder: AudioRecorder, modelManager: ModelManager) {
@@ -106,6 +107,15 @@ class TranscriptionService {
             logger.info("Transcription result: '\(text)'")
             lastTranscription = text
             state = .completed(text)
+
+            // Auto-insert text at cursor
+            do {
+                try await textInsertionService.insertText(text)
+                logger.info("Text inserted at cursor")
+            } catch {
+                logger.error("Text insertion failed: \(error)")
+                // Text is still on clipboard, user can paste manually
+            }
         } catch {
             logger.error("Transcription error: \(error)")
             state = .error(error)
