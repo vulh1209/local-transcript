@@ -18,12 +18,16 @@
 		A1000011001 /* LaunchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011000 /* LaunchManager.swift */; };
 		A1000012001 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000012000 /* AudioRecorder.swift */; };
 		A1000013001 /* FloatingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013000 /* FloatingIndicator.swift */; };
-		A1000014001 /* FloatingIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000014000 /* FloatingIndicatorPanel.swift */; };
+		A1000014001 /* StatusIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000014000 /* StatusIndicatorPanel.swift */; };
+		A1000021001 /* StatusIndicatorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000021000 /* StatusIndicatorState.swift */; };
 		A1000015001 /* AudioFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000015000 /* AudioFeedback.swift */; };
 		A1000016001 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000016000 /* TranscriptionService.swift */; };
 		A1000017001 /* HotkeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000017000 /* HotkeyService.swift */; };
 		A1000018001 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A1000018000 /* KeyboardShortcuts */; };
 		A1000019001 /* TextInsertionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000019000 /* TextInsertionService.swift */; };
+		A1000020001 /* LanguageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000020000 /* LanguageMode.swift */; };
+		A1000023001 /* TranscriptionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000023000 /* TranscriptionRecord.swift */; };
+		A1000024001 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000 /* HistoryManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,11 +44,15 @@
 		A1000011000 /* LaunchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchManager.swift; sourceTree = "<group>"; };
 		A1000012000 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		A1000013000 /* FloatingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingIndicator.swift; sourceTree = "<group>"; };
-		A1000014000 /* FloatingIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingIndicatorPanel.swift; sourceTree = "<group>"; };
+		A1000014000 /* StatusIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorPanel.swift; sourceTree = "<group>"; };
+		A1000021000 /* StatusIndicatorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorState.swift; sourceTree = "<group>"; };
 		A1000015000 /* AudioFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeedback.swift; sourceTree = "<group>"; };
 		A1000016000 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		A1000017000 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
 		A1000019000 /* TextInsertionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInsertionService.swift; sourceTree = "<group>"; };
+		A1000020000 /* LanguageMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageMode.swift; sourceTree = "<group>"; };
+		A1000023000 /* TranscriptionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionRecord.swift; sourceTree = "<group>"; };
+		A1000024000 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,7 +105,7 @@
 				A1000003000 /* SettingsView.swift */,
 				A1000004000 /* HiddenWindowView.swift */,
 				A1000013000 /* FloatingIndicator.swift */,
-				A1000014000 /* FloatingIndicatorPanel.swift */,
+				A1000014000 /* StatusIndicatorPanel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -106,6 +114,9 @@
 			isa = PBXGroup;
 			children = (
 				A1000005000 /* AppState.swift */,
+				A1000020000 /* LanguageMode.swift */,
+				A1000021000 /* StatusIndicatorState.swift */,
+				A1000023000 /* TranscriptionRecord.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -120,6 +131,7 @@
 				A1000016000 /* TranscriptionService.swift */,
 				A1000017000 /* HotkeyService.swift */,
 				A1000019000 /* TextInsertionService.swift */,
+				A1000024000 /* HistoryManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -218,11 +230,15 @@
 				A1000011001 /* LaunchManager.swift in Sources */,
 				A1000012001 /* AudioRecorder.swift in Sources */,
 				A1000013001 /* FloatingIndicator.swift in Sources */,
-				A1000014001 /* FloatingIndicatorPanel.swift in Sources */,
+				A1000014001 /* StatusIndicatorPanel.swift in Sources */,
+				A1000021001 /* StatusIndicatorState.swift in Sources */,
 				A1000015001 /* AudioFeedback.swift in Sources */,
 				A1000016001 /* TranscriptionService.swift in Sources */,
 				A1000017001 /* HotkeyService.swift in Sources */,
 				A1000019001 /* TextInsertionService.swift in Sources */,
+				A1000020001 /* LanguageMode.swift in Sources */,
+				A1000023001 /* TranscriptionRecord.swift in Sources */,
+				A1000024001 /* HistoryManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -18,10 +18,17 @@ class TranscriptionService {
     private(set) var state: TranscriptionState = .idle
     private(set) var lastTranscription: String = ""
 
+    // Use UserDefaults directly to avoid @AppStorage conflict with @Observable macro
+    @ObservationIgnored
+    private var languageMode: String {
+        get { UserDefaults.standard.string(forKey: "languageMode") ?? LanguageMode.auto.rawValue }
+        set { UserDefaults.standard.set(newValue, forKey: "languageMode") }
+    }
+
     private let audioRecorder: AudioRecorder
     private let modelManager: ModelManager
     private let textInsertionService = TextInsertionService()
-    private var floatingPanel: FloatingIndicatorPanel?
+    @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
 
     init(audioRecorder: AudioRecorder, modelManager: ModelManager) {
         self.audioRecorder = audioRecorder
@@ -57,6 +64,8 @@ class TranscriptionService {
         // Ensure model is loaded (lazy loading)
         if !modelManager.isModelLoaded {
             print("[StartRecording] Loading model...")
+            // Show downloading indicator (indeterminate progress since ModelManager doesn't have progress callbacks yet)
+            showStatusPanel(.downloading(progress: 0))
             try await modelManager.loadModel()
             print("[StartRecording] Model loaded")
         }
@@ -64,8 +73,8 @@ class TranscriptionService {
         // Play start sound
         AudioFeedback.playStartSound()
 
-        // Show floating indicator
-        showFloatingIndicator()
+        // Show status panel
+        showStatusPanel(.recording)
 
         // Start recording
         print("[StartRecording] Starting audio recorder...")
@@ -86,14 +95,15 @@ class TranscriptionService {
         let samples = audioRecorder.stopRecording()
         print("[StopRecording] Got \(samples.count) samples (\(Double(samples.count) / 16000.0) seconds)")
 
-        // Hide floating indicator
-        hideFloatingIndicator()
+        // Show transcribing state
+        showStatusPanel(.transcribing)
 
         // Play stop sound
         AudioFeedback.playStopSound()
 
         guard !samples.isEmpty else {
             logger.error("No audio captured")
+            showStatusPanel(.error(message: "No audio captured"))
             state = .error(TranscriptionError.noAudioCaptured)
             return
         }
@@ -108,6 +118,9 @@ class TranscriptionService {
             lastTranscription = text
             state = .completed(text)
 
+            // Hide status panel on success
+            hideStatusPanel()
+
             // Auto-insert text at cursor
             do {
                 try await textInsertionService.insertText(text)
@@ -118,6 +131,7 @@ class TranscriptionService {
             }
         } catch {
             logger.error("Transcription error: \(error)")
+            showStatusPanel(.error(message: error.localizedDescription))
             state = .error(error)
         }
     }
@@ -151,10 +165,14 @@ class TranscriptionService {
 
         print("[Transcribe] Starting with \(samples.count) samples")
 
-        // Auto-detect language (supports Vietnamese, English, and other languages)
+        // Parse language mode from stored setting
+        let mode = LanguageMode(rawValue: languageMode) ?? .auto
+        let whisperLanguage = mode.whisperLanguageCode
+        print("[Transcribe] Language mode: \(mode.rawValue), whisper language: \(whisperLanguage ?? "auto-detect")")
+
         let options = DecodingOptions(
             task: .transcribe,
-            language: nil,  // Auto-detect
+            language: whisperLanguage,
             temperatureFallbackCount: 3,
             sampleLength: 224,
             usePrefillPrompt: true,
@@ -182,17 +200,18 @@ class TranscriptionService {
     }
 
     @MainActor
-    private func showFloatingIndicator() {
-        if floatingPanel == nil {
-            floatingPanel = FloatingIndicatorPanel()
+    private func showStatusPanel(_ state: StatusIndicatorState) {
+        if statusPanel == nil {
+            statusPanel = StatusIndicatorPanel()
         }
-        floatingPanel?.orderFront(nil)
+        statusPanel?.updateState(state)
+        statusPanel?.orderFront(nil)
     }
 
     @MainActor
-    private func hideFloatingIndicator() {
-        floatingPanel?.close()
-        floatingPanel = nil
+    private func hideStatusPanel() {
+        statusPanel?.close()
+        statusPanel = nil
     }
 
     enum TranscriptionError: LocalizedError {
