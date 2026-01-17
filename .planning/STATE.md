@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-17)
 
 **Core value:** Noi tieng Viet, ra text chinh xac, khong can internet.
-**Current focus:** Phase 2 - Audio + Transcription
+**Current focus:** Phase 3 - System Integration
 
 ## Current Position
 
-Phase: 2 of 4 (Audio + Transcription)
-Plan: 2 of 3 in current phase
+Phase: 3 of 4 (System Integration)
+Plan: 1 of 2 in current phase
 Status: In progress
-Last activity: 2026-01-17 - Completed 02-02-PLAN.md (Recording State Feedback)
+Last activity: 2026-01-17 - Completed 03-01-PLAN.md (Core Services)
 
-Progress: [####------] 44% (4 of 9 total plans)
+Progress: [#####-----] 56% (5 of 9 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 5 min
-- Total execution time: 19 min
+- Total execution time: 23 min
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [####------] 44% (4 of 9 total plans)
 |-------|-------|-------|----------|
 | 01-foundation | 2/2 | 13 min | 6.5 min |
 | 02-audio-transcription | 2/3 | 6 min | 3 min |
+| 03-system-integration | 1/2 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5 min), 01-02 (8 min), 02-01 (2 min), 02-02 (4 min)
+- Last 5 plans: 01-02 (8 min), 02-01 (2 min), 02-02 (4 min), 03-01 (4 min)
 - Trend: Fast execution for well-researched plans
 
 *Updated after each plan completion*
@@ -57,6 +58,9 @@ Recent decisions affecting current work:
 - [02-02]: System sounds 1113/1114 for begin/end_record - respects user volume settings
 - [02-02]: NSPanel with canJoinAllSpaces + fullScreenAuxiliary for fullscreen visibility
 - [02-02]: .ultraThinMaterial background for floating indicator - native macOS vibrancy
+- [03-01]: Option+Space as default hotkey (non-conflicting, easy to hold)
+- [03-01]: Dual insertion strategy: AX first, clipboard+paste fallback
+- [03-01]: 50ms delay before paste to ensure clipboard sync
 
 ### Pending Todos
 
@@ -69,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-17T14:55:13Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-01-17T16:24:38Z
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None
