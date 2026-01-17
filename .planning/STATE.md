@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2025-01-17)
 ## Current Position
 
 Phase: 1 of 4 (Foundation)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-17 - Completed 01-01-PLAN.md (Menu Bar App Shell)
+Plan: 2 of 2 in current phase
+Status: Phase 1 complete
+Last activity: 2026-01-17 - Completed 01-02-PLAN.md (Core Data Model Design)
 
-Progress: [#---------] 12.5% (1 of 8 total plans)
+Progress: [##--------] 25% (2 of 8 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 5 min
-- Total execution time: 5 min
+- Total plans completed: 2
+- Average duration: 6.5 min
+- Total execution time: 13 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation | 1/2 | 5 min | 5 min |
+| 01-foundation | 2/2 | 13 min | 6.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5 min)
-- Trend: Not enough data
+- Last 5 plans: 01-01 (5 min), 01-02 (8 min)
+- Trend: Consistent execution time
 
 *Updated after each plan completion*
 
@@ -47,6 +47,9 @@ Recent decisions affecting current work:
 - [Roadmap]: Combined Audio + Transcription phase (natural testing boundary)
 - [01-01]: Hidden window scene must be declared before Settings scene for workaround
 - [01-01]: macOS 14+ minimum target for openSettings environment
+- [01-02]: Lazy model loading - load on first use, not app launch (prevents 3-5s startup freeze)
+- [01-02]: Model storage at ~/Library/Application Support/LocalTranscript/
+- [01-02]: SMAppService.mainApp for login item (reads from system state, user can change externally)
 
 ### Pending Todos
 
@@ -59,6 +62,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-17T14:19:13Z
-Stopped at: Completed 01-01-PLAN.md, ready for 01-02-PLAN.md
+Last session: 2026-01-17T14:30:00Z
+Stopped at: Completed 01-02-PLAN.md (Phase 1 complete), ready for Phase 2
 Resume file: None
