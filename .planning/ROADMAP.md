@@ -78,13 +78,13 @@ Plans:
   3. Status feedback shown when blocked (downloading model, transcribing, etc.)
   4. App stores recent transcriptions
   5. User can view and copy text from transcription history
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: Settings panel with model selection + language mode picker
-- [ ] 04-02: Language switch hotkey (cycle Auto → Vietnamese → English)
-- [ ] 04-03: Status feedback UI (toast/floating indicator for: downloading, transcribing, error states)
-- [ ] 04-04: Transcription history storage and UI
+- [ ] 04-01-PLAN.md - Language mode selection (Auto/Vietnamese/English) + cycle hotkey (Option+L)
+- [ ] 04-02-PLAN.md - Status feedback UI (recording, transcribing, downloading, error states)
+- [ ] 04-03-PLAN.md - Model size selection (tiny/base/small/medium/large) with download progress
+- [ ] 04-04-PLAN.md - Transcription history storage and viewing with SwiftData
 
 ## Progress
 
@@ -96,11 +96,12 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation | 2/2 | Complete | 2026-01-17 |
 | 2. Audio + Transcription | 3/3 | Complete | 2026-01-17 |
 | 3. System Integration | 2/2 | Complete | 2026-01-17 |
-| 4. Polish | 0/4 | Not started | - |
+| 4. Polish | 0/4 | Planned | - |
 
 ---
 *Roadmap created: 2025-01-17*
 *Phase 1 planned: 2025-01-17*
 *Phase 2 planned: 2026-01-17*
 *Phase 3 planned: 2026-01-17*
-*Depth: quick (4 phases, 9 plans)*
+*Phase 4 planned: 2026-01-18*
+*Depth: quick (4 phases, 11 plans)*
