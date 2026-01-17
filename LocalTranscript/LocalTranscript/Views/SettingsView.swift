@@ -6,19 +6,21 @@ struct SettingsView: View {
     @State private var micStatus: PermissionManager.MicrophoneStatus = .notDetermined
     @State private var accessibilityGranted = false
     @AppStorage("languageMode") private var languageMode = LanguageMode.auto.rawValue
-    @AppStorage("selectedModel") private var selectedModel = "small"
+    @State private var selectedTab = 0
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             generalTab
                 .tabItem {
                     Label("General", systemImage: "gear")
                 }
+                .tag(0)
 
             historyTab
                 .tabItem {
                     Label("History", systemImage: "clock")
                 }
+                .tag(1)
         }
         .frame(width: 500, height: 550)
         .onAppear {
@@ -68,7 +70,14 @@ struct SettingsView: View {
             }
 
             Section("Model") {
-                Picker("Model Size", selection: $selectedModel) {
+                Picker("Model Size", selection: Binding(
+                    get: { appState.modelManager.selectedModel },
+                    set: { newValue in
+                        Task {
+                            try? await appState.modelManager.switchModel(to: newValue)
+                        }
+                    }
+                )) {
                     ForEach(ModelManager.availableModels) { model in
                         HStack {
                             Text(model.name)
@@ -80,12 +89,6 @@ struct SettingsView: View {
                     }
                 }
                 .disabled(appState.modelManager.isLoading || appState.modelManager.isDownloading)
-                .onChange(of: selectedModel) { oldValue, newValue in
-                    guard oldValue != newValue else { return }
-                    Task {
-                        try? await appState.modelManager.switchModel(to: newValue)
-                    }
-                }
 
                 // Status row showing current state
                 HStack {

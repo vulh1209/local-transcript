@@ -126,7 +126,8 @@ class ModelManager {
     /// Switch to a different model
     /// - Parameter model: Model ID to switch to (e.g., "tiny", "small", "large-v3")
     func switchModel(to model: String) async throws {
-        guard model != selectedModel || whisperKit == nil else { return }
+        // Skip if same model is already loaded
+        guard whisperKit == nil || model != selectedModel else { return }
 
         selectedModel = model
         unloadModel()
