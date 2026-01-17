@@ -1,0 +1,97 @@
+# Roadmap: VoiceType
+
+## Overview
+
+VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases. We start with a non-sandboxed menu bar shell and PhoWhisper model loading (the architecture decisions that affect everything downstream), then build audio capture and transcription as a combined pipeline, integrate global hotkeys and text insertion for the complete user flow, and finish with settings UI and history features.
+
+## Phases
+
+**Phase Numbering:**
+- Integer phases (1, 2, 3, 4): Planned milestone work
+- Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
+
+- [ ] **Phase 1: Foundation** - Menu bar app shell, permissions, PhoWhisper model loading
+- [ ] **Phase 2: Audio + Transcription** - Recording pipeline and ML inference
+- [ ] **Phase 3: System Integration** - Global hotkeys, text insertion, hold-to-talk and toggle modes
+- [ ] **Phase 4: Polish** - Settings UI, model selection, transcription history
+
+## Phase Details
+
+### Phase 1: Foundation
+**Goal**: App runs as menu bar app with correct architecture (non-sandboxed) and can load PhoWhisper model
+**Depends on**: Nothing (first phase)
+**Requirements**: APP-01, APP-02, APP-03, SET-02, SET-03
+**Success Criteria** (what must be TRUE):
+  1. App appears in menu bar with status icon (no dock icon)
+  2. App requests and handles microphone and accessibility permissions
+  3. App can start on login (user-configurable)
+  4. PhoWhisper model loads successfully and persists across app launches
+  5. Settings menu accessible from menu bar icon
+**Plans**: TBD
+
+Plans:
+- [ ] 01-01: Menu bar app shell and permission handling
+- [ ] 01-02: PhoWhisper model integration and persistence
+
+### Phase 2: Audio + Transcription
+**Goal**: App can record audio and transcribe Vietnamese speech to text offline
+**Depends on**: Phase 1
+**Requirements**: REC-01, REC-02, REC-03, REC-04, REC-05, TRS-01, TRS-02, TRS-03, TRS-04, TRS-05
+**Success Criteria** (what must be TRUE):
+  1. App captures audio from microphone when recording is triggered
+  2. Visual indicator shows recording state (menu bar icon change + floating indicator)
+  3. Audio feedback plays on recording start and stop
+  4. Vietnamese speech is transcribed to text with high accuracy (PhoWhisper)
+  5. Transcription works 100% offline with punctuation and paragraph breaks
+**Plans**: TBD
+
+Plans:
+- [ ] 02-01: Audio capture pipeline (AVAudioEngine, 16kHz conversion)
+- [ ] 02-02: Recording state management and visual/audio feedback
+- [ ] 02-03: SwiftWhisper integration with PhoWhisper model
+
+### Phase 3: System Integration
+**Goal**: User can trigger recording with global hotkey and have text inserted at cursor
+**Depends on**: Phase 2
+**Requirements**: ACT-01, ACT-02, ACT-03, ACT-04, OUT-01, OUT-02, OUT-03
+**Success Criteria** (what must be TRUE):
+  1. User can hold hotkey to record, release to transcribe (hold-to-talk mode)
+  2. User can toggle recording on/off with hotkey (toggle mode)
+  3. Global hotkey works from any app
+  4. User can configure custom hotkey
+  5. Transcribed text is inserted at cursor in any macOS app (with clipboard fallback)
+**Plans**: TBD
+
+Plans:
+- [ ] 03-01: Global hotkey capture (CGEventTap, hold-to-talk state machine)
+- [ ] 03-02: Text insertion service (AXUIElement with clipboard fallback)
+
+### Phase 4: Polish
+**Goal**: User can configure model size and view transcription history
+**Depends on**: Phase 3
+**Requirements**: SET-01, HST-01, HST-02, HST-03
+**Success Criteria** (what must be TRUE):
+  1. User can choose between PhoWhisper model sizes (tiny/base/medium)
+  2. App stores recent transcriptions
+  3. User can view and copy text from transcription history
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: Settings panel with model selection
+- [ ] 04-02: Transcription history storage and UI
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Foundation | 0/2 | Not started | - |
+| 2. Audio + Transcription | 0/3 | Not started | - |
+| 3. System Integration | 0/2 | Not started | - |
+| 4. Polish | 0/2 | Not started | - |
+
+---
+*Roadmap created: 2025-01-17*
+*Depth: quick (4 phases, 9 plans)*

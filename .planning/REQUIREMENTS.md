@@ -1,7 +1,7 @@
 # Requirements: VoiceType
 
 **Defined:** 2025-01-17
-**Core Value:** Nói tiếng Việt, ra text chính xác, không cần internet.
+**Core Value:** Noi tieng Viet, ra text chinh xac, khong can internet.
 
 ## v1 Requirements
 
@@ -73,13 +73,13 @@
 
 | Feature | Reason |
 |---------|--------|
-| Real-time streaming transcription | Ưu tiên accuracy, streaming gây phân tán |
-| Cloud LLM cleanup | Phá vỡ offline-only promise |
-| Voice commands ("delete last word") | Quá phức tạp, ngoài scope dictation |
-| Auto language switching | Không đáng tin cậy |
+| Real-time streaming transcription | Uu tien accuracy, streaming gay phan tan |
+| Cloud LLM cleanup | Pha vo offline-only promise |
+| Voice commands ("delete last word") | Qua phuc tap, ngoai scope dictation |
+| Auto language switching | Khong dang tin cay |
 | Always-on listening | Battery drain, privacy concerns |
-| Auto-send/submit | Nguy hiểm, không có cơ hội review |
-| Multi-speaker support | Ngoài scope single-user dictation |
+| Auto-send/submit | Nguy hiem, khong co co hoi review |
+| Multi-speaker support | Ngoai scope single-user dictation |
 | Windows/Linux | macOS only |
 | Mobile app | Desktop only |
 
@@ -87,38 +87,38 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ACT-01 | Phase TBD | Pending |
-| ACT-02 | Phase TBD | Pending |
-| ACT-03 | Phase TBD | Pending |
-| ACT-04 | Phase TBD | Pending |
-| REC-01 | Phase TBD | Pending |
-| REC-02 | Phase TBD | Pending |
-| REC-03 | Phase TBD | Pending |
-| REC-04 | Phase TBD | Pending |
-| REC-05 | Phase TBD | Pending |
-| TRS-01 | Phase TBD | Pending |
-| TRS-02 | Phase TBD | Pending |
-| TRS-03 | Phase TBD | Pending |
-| TRS-04 | Phase TBD | Pending |
-| TRS-05 | Phase TBD | Pending |
-| OUT-01 | Phase TBD | Pending |
-| OUT-02 | Phase TBD | Pending |
-| OUT-03 | Phase TBD | Pending |
-| SET-01 | Phase TBD | Pending |
-| SET-02 | Phase TBD | Pending |
-| SET-03 | Phase TBD | Pending |
-| HST-01 | Phase TBD | Pending |
-| HST-02 | Phase TBD | Pending |
-| HST-03 | Phase TBD | Pending |
-| APP-01 | Phase TBD | Pending |
-| APP-02 | Phase TBD | Pending |
-| APP-03 | Phase TBD | Pending |
+| ACT-01 | Phase 3 | Pending |
+| ACT-02 | Phase 3 | Pending |
+| ACT-03 | Phase 3 | Pending |
+| ACT-04 | Phase 3 | Pending |
+| REC-01 | Phase 2 | Pending |
+| REC-02 | Phase 2 | Pending |
+| REC-03 | Phase 2 | Pending |
+| REC-04 | Phase 2 | Pending |
+| REC-05 | Phase 2 | Pending |
+| TRS-01 | Phase 2 | Pending |
+| TRS-02 | Phase 2 | Pending |
+| TRS-03 | Phase 2 | Pending |
+| TRS-04 | Phase 2 | Pending |
+| TRS-05 | Phase 2 | Pending |
+| OUT-01 | Phase 3 | Pending |
+| OUT-02 | Phase 3 | Pending |
+| OUT-03 | Phase 3 | Pending |
+| SET-01 | Phase 4 | Pending |
+| SET-02 | Phase 1 | Pending |
+| SET-03 | Phase 1 | Pending |
+| HST-01 | Phase 4 | Pending |
+| HST-02 | Phase 4 | Pending |
+| HST-03 | Phase 4 | Pending |
+| APP-01 | Phase 1 | Pending |
+| APP-02 | Phase 1 | Pending |
+| APP-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 26 total
-- Mapped to phases: 0 (TBD)
-- Unmapped: 26
+- Mapped to phases: 26
+- Unmapped: 0
 
 ---
 *Requirements defined: 2025-01-17*
-*Last updated: 2025-01-17 after initial definition*
+*Last updated: 2025-01-17 after roadmap creation*
