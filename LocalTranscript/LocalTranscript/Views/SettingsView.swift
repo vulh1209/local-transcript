@@ -17,7 +17,7 @@ struct SettingsView: View {
 
             Section("Model") {
                 HStack {
-                    Text("PhoWhisper Medium")
+                    Text("Whisper Small")
                     Spacer()
                     if appState.modelManager.isModelLoaded {
                         Image(systemName: "checkmark.circle.fill")
@@ -27,28 +27,19 @@ struct SettingsView: View {
                     } else if appState.modelManager.isLoading {
                         ProgressView()
                             .controlSize(.small)
-                        Text("Loading...")
-                            .foregroundStyle(.secondary)
-                    } else if appState.modelManager.isModelFilePresent {
-                        Text("Ready to load")
+                        Text(appState.modelManager.loadProgress)
                             .foregroundStyle(.secondary)
                     } else {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        Text("Model not found")
+                        Image(systemName: "arrow.down.circle")
+                            .foregroundStyle(.blue)
+                        Text("Downloads on first use")
                             .foregroundStyle(.secondary)
                     }
                 }
 
-                if !appState.modelManager.isModelFilePresent {
-                    Text("Download model from HuggingFace and place in:\n\(appState.modelManager.modelStoragePath.path)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    Button("Open Model Folder") {
-                        NSWorkspace.shared.open(appState.modelManager.modelStoragePath)
-                    }
-                }
+                Text("Model downloads automatically via WhisperKit (~250MB)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
 
                 if let error = appState.modelManager.loadError {
                     Text(error.localizedDescription)

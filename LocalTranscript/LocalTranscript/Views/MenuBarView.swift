@@ -101,12 +101,9 @@ struct MenuBarView: View {
         } else if appState.modelManager.isModelLoaded {
             Label("Ready", systemImage: "checkmark.circle")
                 .foregroundStyle(.green)
-        } else if appState.modelManager.isModelFilePresent {
-            Label("Model ready to load", systemImage: "circle")
-                .foregroundStyle(.secondary)
         } else {
-            Label("Model not found", systemImage: "exclamationmark.triangle")
-                .foregroundStyle(.orange)
+            Label("Model will load on first use", systemImage: "arrow.down.circle")
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -114,7 +111,7 @@ struct MenuBarView: View {
 
     @ViewBuilder
     private var modelControlsSection: some View {
-        if !appState.modelManager.isModelLoaded && appState.modelManager.isModelFilePresent && !appState.modelManager.isLoading {
+        if !appState.modelManager.isModelLoaded && !appState.modelManager.isLoading {
             Button("Load Model") {
                 Task {
                     try? await appState.modelManager.loadModel()

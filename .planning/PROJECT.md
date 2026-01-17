@@ -57,7 +57,11 @@ Nói tiếng Việt, ra text chính xác, không cần internet.
 |----------|-----------|---------|
 | Ưu tiên accuracy hơn real-time | User muốn text chuẩn, chờ 1-2s OK | — Pending |
 | Hỗ trợ cả hold-to-talk và toggle | Linh hoạt cho nhiều tình huống | — Pending |
-| Menu bar + floating indicator | Minimal UI, không chiếm desktop space | — Pending |
+| Menu bar + floating indicator | Minimal UI, không chiếm desktop space | ✅ Implemented (Phase 2) |
+| **WhisperKit thay SwiftWhisper** | CoreML optimization, auto model download, simpler API | ✅ Implemented (Phase 2) |
+| **whisper-small model** | Good balance speed/accuracy (~250MB), Vietnamese support | ✅ Implemented (Phase 2) |
+| **NSSound thay AudioServicesPlaySystemSound** | iOS sound IDs không hoạt động trên macOS | ✅ Implemented (Phase 2) |
+| **Pure AppKit FloatingIndicatorPanel** | SwiftUI NSHostingView gây constraint crashes | ✅ Implemented (Phase 2) |
 
 ---
-*Last updated: 2025-01-17 after initialization*
+*Last updated: 2026-01-17 after Phase 2 WhisperKit migration*

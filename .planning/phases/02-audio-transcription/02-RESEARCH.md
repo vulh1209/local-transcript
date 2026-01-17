@@ -1,12 +1,15 @@
 # Phase 02: Audio + Transcription - Research
 
 **Researched:** 2026-01-17
-**Domain:** Audio capture (AVAudioEngine), Speech-to-text (SwiftWhisper/PhoWhisper), SwiftUI state management
+**Updated:** 2026-01-17 (WhisperKit migration)
+**Domain:** Audio capture (AVAudioEngine), Speech-to-text (WhisperKit), SwiftUI state management
 **Confidence:** HIGH
 
 ## Summary
 
-This phase implements the complete audio recording and transcription pipeline for Vietnamese speech-to-text. The stack is well-established: AVAudioEngine for microphone capture with AVAudioConverter for 16kHz resampling, SwiftWhisper wrapping whisper.cpp for transcription, and PhoWhisper (already integrated in Phase 1) for Vietnamese accuracy.
+This phase implements the complete audio recording and transcription pipeline for Vietnamese speech-to-text. The stack is well-established: AVAudioEngine for microphone capture with AVAudioConverter for 16kHz resampling, **WhisperKit** (Apple's optimized Whisper implementation) for transcription with CoreML acceleration.
+
+**UPDATE (2026-01-17):** Migrated from SwiftWhisper + PhoWhisper to **WhisperKit** for better Apple Silicon optimization and simpler API. WhisperKit automatically downloads models and uses CoreML for fast inference.
 
 The primary technical challenges are:
 1. Audio format conversion - AVAudioEngine captures at 44.1/48kHz but Whisper requires 16kHz mono Float32
@@ -24,14 +27,16 @@ The established libraries/tools for this domain:
 |---------|---------|---------|--------------|
 | AVAudioEngine | System | Microphone capture | Apple's modern audio API, handles hardware abstraction |
 | AVAudioConverter | System | Sample rate conversion | Official API for format conversion, handles edge cases |
-| SwiftWhisper | 1.2.0 | Transcription | Already in project, wraps whisper.cpp efficiently |
-| PhoWhisper-medium | ggml | Vietnamese ASR model | 4.97% WER, already loaded via ModelManager |
+| **WhisperKit** | latest | Transcription | Apple-optimized, CoreML acceleration, auto model download |
+| whisper-small | CoreML | ASR model | Good balance of speed/accuracy, ~250MB, Vietnamese support |
 
 ### Supporting
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| AudioToolbox | System | System sounds | For recording start/stop beeps |
+| **NSSound** | System | Audio feedback | For recording start/stop beeps (macOS native) |
 | NSPanel | System | Floating window | Recording indicator overlay |
+
+**Note:** AudioToolbox's `AudioServicesPlaySystemSound` IDs (1113, 1114) are iOS-only. Use `NSSound(named:)` on macOS.
 
 ### Alternatives Considered
 | Instead of | Could Use | Tradeoff |
@@ -39,9 +44,11 @@ The established libraries/tools for this domain:
 | AVAudioEngine | AVAudioRecorder | AVAudioRecorder writes to file; we need in-memory buffer for direct transcription |
 | Custom conversion | vDSP | More control but AVAudioConverter handles common cases |
 | NSPanel | SwiftUI Window | NSPanel has better floating/always-on-top behavior |
+| **WhisperKit** | SwiftWhisper | SwiftWhisper wraps whisper.cpp; WhisperKit uses CoreML for Apple Silicon |
+| NSHostingView in NSPanel | **Pure AppKit** | SwiftUI's NSHostingView can cause constraint crashes; pure AppKit more stable |
 
 **Installation:**
-Already have SwiftWhisper. No new dependencies needed.
+WhisperKit via Swift Package Manager: `https://github.com/argmaxinc/WhisperKit`
 
 ## Architecture Patterns
 
@@ -130,33 +137,49 @@ private func convertBuffer(_ inputBuffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer?
 }
 ```
 
-### Pattern 3: SwiftWhisper Transcription
-**What:** Pass Float array to Whisper.transcribe()
+### Pattern 3: WhisperKit Transcription
+**What:** Pass Float array to WhisperKit.transcribe() with Vietnamese language
 **When to use:** After recording stops and audio is converted
 **Example:**
 ```swift
-// Source: SwiftWhisper GitHub README
+// Source: WhisperKit GitHub
 func transcribe(audioSamples: [Float]) async throws -> String {
-    guard let whisper = modelManager.whisper else {
+    guard let whisperKit = modelManager.whisperKit else {
         throw TranscriptionError.modelNotLoaded
     }
 
-    let segments = try await whisper.transcribe(audioFrames: audioSamples)
-    return segments.map(\.text).joined(separator: " ")
+    // Configure for Vietnamese language
+    let options = DecodingOptions(
+        task: .transcribe,
+        language: "vi",  // Vietnamese
+        temperatureFallbackCount: 3,
+        sampleLength: 224,
+        usePrefillPrompt: true,
+        usePrefillCache: true,
+        skipSpecialTokens: true,
+        withoutTimestamps: true
+    )
+
+    let results = try await whisperKit.transcribe(audioArray: audioSamples, decodeOptions: options)
+    return results.compactMap { $0.text }
+        .joined(separator: " ")
+        .trimmingCharacters(in: CharacterSet.whitespaces)
 }
 ```
 
-### Pattern 4: Floating NSPanel for Recording Indicator
+### Pattern 4: Floating NSPanel for Recording Indicator (Pure AppKit)
 **What:** Always-on-top window showing recording state
 **When to use:** Visual feedback that recording is active
 **Example:**
 ```swift
-// Source: Cindori floating panel tutorial
+// Source: Cindori floating panel tutorial (modified for pure AppKit)
+// NOTE: Using pure AppKit instead of NSHostingView to avoid SwiftUI constraint crashes
 class FloatingIndicatorPanel: NSPanel {
-    init(content: some View) {
+    init() {
+        let panelRect = NSRect(x: 0, y: 0, width: 120, height: 36)
         super.init(
-            contentRect: NSRect(x: 0, y: 0, width: 120, height: 40),
-            styleMask: [.nonactivatingPanel, .fullSizeContentView],
+            contentRect: panelRect,
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
         )
@@ -164,13 +187,30 @@ class FloatingIndicatorPanel: NSPanel {
         isFloatingPanel = true
         level = .floating
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        hidesOnDeactivate = false  // Keep visible when app loses focus
+        hidesOnDeactivate = false
         isMovableByWindowBackground = true
-        titlebarAppearsTransparent = true
-        titleVisibility = .hidden
         backgroundColor = .clear
+        isOpaque = false
+        hasShadow = true
 
-        contentView = NSHostingView(rootView: content)
+        // Pure AppKit content (no SwiftUI NSHostingView)
+        let containerView = NSView(frame: panelRect)
+        containerView.wantsLayer = true
+        containerView.layer?.cornerRadius = 18
+        containerView.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95).cgColor
+
+        let dotView = NSView(frame: NSRect(x: 16, y: 12, width: 12, height: 12))
+        dotView.wantsLayer = true
+        dotView.layer?.cornerRadius = 6
+        dotView.layer?.backgroundColor = NSColor.systemRed.cgColor
+        containerView.addSubview(dotView)
+
+        let label = NSTextField(labelWithString: "Recording")
+        label.frame = NSRect(x: 36, y: 8, width: 70, height: 20)
+        label.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        containerView.addSubview(label)
+
+        contentView = containerView
     }
 }
 ```
@@ -339,23 +379,25 @@ class AudioRecorder {
 ### Audio Feedback (Start/Stop Beeps)
 ```swift
 // Source: Apple Developer Documentation
-import AudioToolbox
+// NOTE: AudioServicesPlaySystemSound IDs (1113, 1114) are iOS-only!
+// Use NSSound on macOS instead
+import AppKit
 
 struct AudioFeedback {
     static func playStartSound() {
-        // System sound 1113 = "begin_record" on macOS
-        AudioServicesPlaySystemSound(1113)
+        // Use built-in macOS sound names
+        if let sound = NSSound(named: "Morse") {
+            sound.play()
+        } else {
+            NSSound.beep()
+        }
     }
 
     static func playStopSound() {
-        // System sound 1114 = "end_record" on macOS
-        AudioServicesPlaySystemSound(1114)
-    }
-
-    // Alternative: use NSSound for custom sounds
-    static func playCustomSound(named name: String) {
-        if let sound = NSSound(named: NSSound.Name(name)) {
+        if let sound = NSSound(named: "Ping") {
             sound.play()
+        } else {
+            NSSound.beep()
         }
     }
 }
@@ -383,19 +425,24 @@ struct LocalTranscriptApp: App {
 }
 ```
 
-### WhisperParams Configuration for Vietnamese
+### WhisperKit DecodingOptions for Vietnamese
 ```swift
-// Source: whisper.cpp documentation, SwiftWhisper
-// Note: SwiftWhisper exposes WhisperParams through @dynamicMemberLookup
+// Source: WhisperKit GitHub
+// Note: WhisperKit uses DecodingOptions instead of WhisperParams
 
 // When calling transcribe, configure for Vietnamese:
-let params = WhisperParams.default
-params.language = .vietnamese  // or WhisperLanguage(rawValue: "vi")
-params.whisperParams.suppress_blank = true
-params.whisperParams.print_progress = false
-params.whisperParams.no_timestamps = true  // We don't need word timestamps
+let options = DecodingOptions(
+    task: .transcribe,
+    language: "vi",  // Vietnamese language code
+    temperatureFallbackCount: 3,
+    sampleLength: 224,
+    usePrefillPrompt: true,
+    usePrefillCache: true,
+    skipSpecialTokens: true,
+    withoutTimestamps: true
+)
 
-let segments = try await whisper.transcribe(audioFrames: samples, params: params)
+let results = try await whisperKit.transcribe(audioArray: samples, decodeOptions: options)
 ```
 
 ## State of the Art
@@ -404,12 +451,15 @@ let segments = try await whisper.transcribe(audioFrames: samples, params: params
 |--------------|------------------|--------------|--------|
 | AVAudioRecorder to file | AVAudioEngine in-memory | iOS 8+ (2014) | No temp file, direct buffer access |
 | SFSpeechRecognizer | Whisper models | 2022+ | Offline, better accuracy |
-| Generic Whisper | PhoWhisper | 2024 | 4.97% vs 15-20% WER for Vietnamese |
+| SwiftWhisper (whisper.cpp) | **WhisperKit (CoreML)** | 2024+ | Native Apple Silicon optimization |
 | StatusItemView AppKit | MenuBarExtra SwiftUI | macOS 13 (2022) | Native SwiftUI menu bar support |
+| NSHostingView in NSPanel | Pure AppKit NSPanel | 2026 | Avoids SwiftUI constraint crashes |
 
 **Deprecated/outdated:**
 - AVAudioPlayer for recording: Use AVAudioEngine for capture
 - Online-only ASR: Whisper-based models work fully offline
+- SwiftWhisper: WhisperKit is now recommended for Apple platforms
+- AudioServicesPlaySystemSound on macOS: Use NSSound instead (iOS IDs don't work)
 
 ## Open Questions
 
@@ -433,27 +483,26 @@ Things that couldn't be fully resolved:
 ## Sources
 
 ### Primary (HIGH confidence)
-- [SwiftWhisper GitHub](https://github.com/exPHAT/SwiftWhisper) - API usage, audio format requirements
+- [WhisperKit GitHub](https://github.com/argmaxinc/WhisperKit) - API usage, model download, CoreML optimization
 - [Apple AVAudioEngine Forums](https://developer.apple.com/forums/tags/avaudioengine) - Format conversion patterns
-- [whisper.cpp Discussions](https://github.com/ggml-org/whisper.cpp/discussions/2704) - AVAudioPCMBuffer conversion
 - [Cindori Floating Panel](https://cindori.com/developer/floating-panel) - NSPanel configuration
 - [Apple NSSound Documentation](https://developer.apple.com/documentation/appkit/nssound) - Audio feedback
 
 ### Secondary (MEDIUM confidence)
 - [Sarunw MenuBarExtra Tutorial](https://sarunw.com/posts/swiftui-menu-bar-app/) - Dynamic icon patterns
 - [HackingWithSwift SF Symbols](https://www.hackingwithswift.com/quick-start/swiftui/how-to-animate-sf-symbols) - Symbol animations
-- [ggml-PhoWhisper-medium HuggingFace](https://huggingface.co/dongxiat/ggml-PhoWhisper-medium) - Model availability
 
-### Tertiary (LOW confidence)
-- System sound IDs (1113, 1114) - Need testing on macOS
+### Tertiary (LOW confidence - RESOLVED)
+- System sound IDs (1113, 1114) - **Confirmed iOS-only, use NSSound on macOS**
 
 ## Metadata
 
 **Confidence breakdown:**
-- Standard stack: HIGH - Well-documented Apple APIs + established SwiftWhisper
+- Standard stack: HIGH - Well-documented Apple APIs + WhisperKit (actively maintained)
 - Architecture: HIGH - Pattern synthesized from multiple verified sources
 - Pitfalls: HIGH - Common issues documented in Apple Developer Forums
-- Audio feedback sounds: MEDIUM - System sound IDs need verification
+- Audio feedback sounds: HIGH - Confirmed NSSound works on macOS
 
 **Research date:** 2026-01-17
+**Updated:** 2026-01-17 (WhisperKit migration, pitfalls verified)
 **Valid until:** 2026-02-17 (30 days - stable domain)
