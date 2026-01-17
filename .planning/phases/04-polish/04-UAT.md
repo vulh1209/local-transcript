@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 04-polish
-source: [04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md, 04-04-SUMMARY.md]
+source: [04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md, 04-04-SUMMARY.md, 04-05-SUMMARY.md]
 started: 2026-01-18T01:00:00Z
-updated: 2026-01-18T01:15:00Z
+updated: 2026-01-18T06:50:00Z
 ---
 
 ## Current Test
@@ -38,15 +38,14 @@ result: pass
 
 ### 7. Model Download Progress
 expected: Select a different model that isn't downloaded. Progress bar appears in Settings showing download progress. Status indicator also shows downloading state.
-result: issue
-reported: "switch modal medium and notthing hahapen"
-severity: major
+result: pass
+note: "Re-tested after 04-05 gap closure fix. Model switching now triggers download with progress display."
 
 ### 8. History Tab in Settings
 expected: Open Settings. A History tab is available alongside General. Clicking it shows list of past transcriptions with timestamps.
-result: issue
-reported: "ko thấy icon history nhưng click vào kế bên general thì có chuyển sang tab history"
-severity: minor
+result: pass
+note: "Re-tested after 04-05 gap closure fix. History tab icon now visible."
+feedback: "UX suggestion: Clear All button in History tab creates visual confusion (looks like 3 tabs). Consider repositioning for v2."
 
 ### 9. Copy from History
 expected: In History tab, right-click (or secondary click) a transcription entry. Context menu with "Copy" option appears. Selecting it copies text to clipboard.
@@ -64,37 +63,28 @@ note: "Performance concern - timestamp updating every second may be resource-hea
 ## Summary
 
 total: 11
-passed: 9
-issues: 2
+passed: 11
+issues: 0 (2 fixed by 04-05 gap closure)
 pending: 0
 skipped: 0
 
 ## Gaps
 
+### Closed (by 04-05-PLAN.md)
+
 - truth: "Progress bar appears in Settings showing download progress when selecting a new model"
-  status: failed
-  reason: "User reported: switch modal medium and notthing hahapen"
-  severity: major
-  test: 7
-  root_cause: "Race condition - @AppStorage in SettingsView writes to UserDefaults before onChange fires, so ModelManager.switchModel() guard clause sees same value and returns early"
-  artifacts:
-    - path: "LocalTranscript/LocalTranscript/Views/SettingsView.swift"
-      issue: "@AppStorage('selectedModel') at line 9 creates race condition with ModelManager"
-    - path: "LocalTranscript/LocalTranscript/Services/ModelManager.swift"
-      issue: "Guard clause at line 129 compares against already-updated UserDefaults value"
-  missing:
-    - "Remove @AppStorage from SettingsView, bind directly to ModelManager.selectedModel"
-  debug_session: "agent:aebd929"
+  status: closed
+  fix: "Removed @AppStorage, used computed Binding to call switchModel() directly"
+  verified: 2026-01-18T06:50:00Z
 
 - truth: "History tab is visible alongside General in Settings"
-  status: failed
-  reason: "User reported: ko thấy icon history nhưng click vào kế bên general thì có chuyển sang tab history"
-  severity: minor
+  status: closed
+  fix: "Added @State selectedTab, TabView selection binding, explicit .tag() values"
+  verified: 2026-01-18T06:50:00Z
+
+### Future Improvements (v2)
+
+- feedback: "Clear All button in History tab creates visual confusion (looks like 3 tabs)"
+  severity: cosmetic
+  suggestion: "Reposition Clear All button for better UI/UX"
   test: 8
-  root_cause: "macOS Settings scene + TabView with conditional @ViewBuilder in historyTab causes SwiftUI to fail rendering toolbar tab item"
-  artifacts:
-    - path: "LocalTranscript/LocalTranscript/Views/SettingsView.swift"
-      issue: "historyTab at lines 171-183 uses conditional @ViewBuilder which breaks toolbar tab rendering"
-  missing:
-    - "Add explicit .tag() values and selection binding to TabView"
-  debug_session: "agent:aeb1c13"
