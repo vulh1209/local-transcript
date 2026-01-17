@@ -15,7 +15,7 @@ VoiceType delivers multilingual speech-to-text dictation for macOS in four phase
 - [x] **Phase 1: Foundation** - Menu bar app shell, permissions, Whisper model loading
 - [x] **Phase 2: Audio + Transcription** - Recording pipeline and ML inference
 - [x] **Phase 3: System Integration** - Global hotkeys, text insertion, hold-to-talk and toggle modes
-- [ ] **Phase 4: Polish** - Settings UI, model selection, transcription history (UAT fixes pending)
+- [x] **Phase 4: Polish** - Settings UI, model selection, transcription history
 
 ## Phase Details
 
@@ -85,7 +85,7 @@ Plans:
 - [x] 04-02-PLAN.md - Status feedback UI (recording, transcribing, downloading, error states)
 - [x] 04-03-PLAN.md - Model size selection (tiny/base/small/medium/large) with download progress
 - [x] 04-04-PLAN.md - Transcription history storage and viewing with SwiftData
-- [ ] 04-05-PLAN.md - UAT gap closure: model download race condition + History tab icon
+- [x] 04-05-PLAN.md - UAT gap closure: model download race condition + History tab icon
 
 ## Progress
 
@@ -97,7 +97,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation | 2/2 | Complete | 2026-01-17 |
 | 2. Audio + Transcription | 3/3 | Complete | 2026-01-17 |
 | 3. System Integration | 2/2 | Complete | 2026-01-17 |
-| 4. Polish | 4/5 | UAT Fixes | - |
+| 4. Polish | 5/5 | Complete | 2026-01-18 |
 
 ---
 *Roadmap created: 2025-01-17*

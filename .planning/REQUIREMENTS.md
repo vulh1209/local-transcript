@@ -7,50 +7,50 @@
 
 ### Activation
 
-- [ ] **ACT-01**: User can hold hotkey to record, release to transcribe
-- [ ] **ACT-02**: User can toggle recording on/off with hotkey
-- [ ] **ACT-03**: User can configure custom hotkey in settings
-- [ ] **ACT-04**: Global hotkey works from any app
+- [x] **ACT-01**: User can hold hotkey to record, release to transcribe
+- [x] **ACT-02**: User can toggle recording on/off with hotkey
+- [x] **ACT-03**: User can configure custom hotkey in settings
+- [x] **ACT-04**: Global hotkey works from any app
 
 ### Recording
 
-- [ ] **REC-01**: App captures audio from microphone
-- [ ] **REC-02**: Visual indicator shows when recording is active (menu bar)
-- [ ] **REC-03**: Floating indicator shows when recording is active
-- [ ] **REC-04**: Audio feedback (beep) plays on recording start
-- [ ] **REC-05**: Audio feedback (beep) plays on recording stop
+- [x] **REC-01**: App captures audio from microphone
+- [x] **REC-02**: Visual indicator shows when recording is active (menu bar)
+- [x] **REC-03**: Floating indicator shows when recording is active
+- [x] **REC-04**: Audio feedback (beep) plays on recording start
+- [x] **REC-05**: Audio feedback (beep) plays on recording stop
 
 ### Transcription
 
-- [ ] **TRS-01**: App transcribes Vietnamese speech to text using local model
-- [ ] **TRS-02**: Transcription works 100% offline (no internet required)
-- [ ] **TRS-03**: App uses PhoWhisper model for Vietnamese accuracy
-- [ ] **TRS-04**: Basic punctuation is included in transcription
-- [ ] **TRS-05**: Multi-line text is supported (paragraph breaks)
+- [x] **TRS-01**: App transcribes Vietnamese speech to text using local model
+- [x] **TRS-02**: Transcription works 100% offline (no internet required)
+- [x] **TRS-03**: App uses Whisper multilingual model (supports Vietnamese + English)
+- [x] **TRS-04**: Basic punctuation is included in transcription
+- [x] **TRS-05**: Multi-line text is supported (paragraph breaks)
 
 ### Text Output
 
-- [ ] **OUT-01**: Transcribed text is inserted at cursor in focused app
-- [ ] **OUT-02**: Text insertion works in any macOS app
-- [ ] **OUT-03**: Fallback to clipboard paste if direct insertion fails
+- [x] **OUT-01**: Transcribed text is inserted at cursor in focused app
+- [x] **OUT-02**: Text insertion works in any macOS app
+- [x] **OUT-03**: Fallback to clipboard paste if direct insertion fails
 
 ### Settings
 
-- [ ] **SET-01**: User can choose between PhoWhisper model sizes (tiny/base/medium)
-- [ ] **SET-02**: User preferences persist between app launches
-- [ ] **SET-03**: Settings accessible from menu bar icon
+- [x] **SET-01**: User can choose between Whisper model sizes (tiny/base/small/medium/large)
+- [x] **SET-02**: User preferences persist between app launches
+- [x] **SET-03**: Settings accessible from menu bar icon
 
 ### History
 
-- [ ] **HST-01**: App stores recent transcriptions
-- [ ] **HST-02**: User can view transcription history
-- [ ] **HST-03**: User can copy text from history
+- [x] **HST-01**: App stores recent transcriptions
+- [x] **HST-02**: User can view transcription history
+- [x] **HST-03**: User can copy text from history
 
 ### App Shell
 
-- [ ] **APP-01**: App runs as menu bar app (no dock icon)
-- [ ] **APP-02**: App starts on login (optional, configurable)
-- [ ] **APP-03**: App requests necessary permissions (microphone, accessibility)
+- [x] **APP-01**: App runs as menu bar app (no dock icon)
+- [x] **APP-02**: App starts on login (optional, configurable)
+- [x] **APP-03**: App requests necessary permissions (microphone, accessibility)
 
 ## v2 Requirements
 
