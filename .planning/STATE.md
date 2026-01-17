@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-17)
 ## Current Position
 
 Phase: 4 of 4 (Polish)
-Plan: 3 of 3 in current phase - COMPLETE
-Status: Phase complete (04-03 skipped as per plan notes)
-Last activity: 2026-01-18 - Completed 04-04-PLAN.md (Transcription History)
+Plan: 4 of 4 in current phase - COMPLETE
+Status: Phase complete (all plans executed including 04-03)
+Last activity: 2026-01-18 - Completed 04-03-PLAN.md (Model Size Selection)
 
-Progress: [##########] 100% (9 of 9 total plans)
+Progress: [##########] 100% (10 of 10 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 5 min
-- Total execution time: 48 min
+- Total execution time: 52 min
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [##########] 100% (9 of 9 total plans)
 | 01-foundation | 2/2 | 13 min | 6.5 min |
 | 02-audio-transcription | 2/3 | 6 min | 3 min |
 | 03-system-integration | 2/2 | 9 min | 4.5 min |
-| 04-polish | 3/3 | 20 min | 6.7 min |
+| 04-polish | 4/4 | 24 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (5 min), 04-01 (6 min), 04-02 (6 min), 04-04 (8 min)
-- Trend: Consistent ~5-8 min per plan
+- Last 5 plans: 04-01 (6 min), 04-02 (6 min), 04-04 (8 min), 04-03 (4 min)
+- Trend: Consistent ~4-8 min per plan
 
 *Updated after each plan completion*
 
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - [04-04]: SwiftData for history persistence - modern Apple framework
 - [04-04]: 100-item history limit - prevents unbounded database growth
 - [04-04]: TabView in Settings - accommodates History tab alongside existing controls
+- [04-03]: WhisperModel struct for type-safe model metadata
+- [04-03]: UserDefaults for selectedModel (not @AppStorage) to avoid @Observable conflict
+- [04-03]: onDownloadProgress callback pattern for flexible UI updates
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-18T00:30:00Z
-Stopped at: Completed 04-04-PLAN.md (Transcription History) - Phase 4 complete
+Last session: 2026-01-17T17:29:02Z
+Stopped at: Completed 04-03-PLAN.md (Model Size Selection) - All plans complete
 Resume file: None
