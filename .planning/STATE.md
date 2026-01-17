@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-17)
 
 **Core value:** Noi tieng Viet, ra text chinh xac, khong can internet.
-**Current focus:** Milestone v1 COMPLETE
+**Current focus:** Milestone v1 COMPLETE (UAT passed)
 
 ## Current Position
 
 Phase: 4 of 4 (Polish)
-Plan: 4 of 4 in current phase - COMPLETE
-Status: Milestone complete
-Last activity: 2026-01-18 - Completed 04-03-PLAN.md (Model Size Selection)
+Plan: 5 of 5 in current phase - COMPLETE
+Status: Milestone complete with UAT
+Last activity: 2026-01-18 - Completed 04-05-PLAN.md (UAT Gap Closure)
 
-Progress: [##########] 100% (10 of 10 total plans)
+Progress: [###########] 100% (11 of 11 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 5 min
-- Total execution time: 52 min
+- Total execution time: 55 min
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [##########] 100% (10 of 10 total plans)
 | 01-foundation | 2/2 | 13 min | 6.5 min |
 | 02-audio-transcription | 2/3 | 6 min | 3 min |
 | 03-system-integration | 2/2 | 9 min | 4.5 min |
-| 04-polish | 4/4 | 24 min | 6 min |
+| 04-polish | 5/5 | 27 min | 5.4 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (6 min), 04-02 (6 min), 04-04 (8 min), 04-03 (4 min)
-- Trend: Consistent ~4-8 min per plan
+- Last 5 plans: 04-02 (6 min), 04-04 (8 min), 04-03 (4 min), 04-05 (3 min)
+- Trend: Consistent ~3-8 min per plan
 
 *Updated after each plan completion*
 
@@ -76,6 +76,8 @@ Recent decisions affecting current work:
 - [04-03]: WhisperModel struct for type-safe model metadata
 - [04-03]: UserDefaults for selectedModel (not @AppStorage) to avoid @Observable conflict
 - [04-03]: onDownloadProgress callback pattern for flexible UI updates
+- [04-05]: Computed Binding for pickers with async actions (avoids @AppStorage race)
+- [04-05]: Explicit .tag() on TabView tabs for conditional @ViewBuilder content
 
 ### Pending Todos
 
@@ -84,11 +86,13 @@ None.
 ### Blockers/Concerns
 
 - [Resolved]: Text insertion edge cases in Electron apps tested - clipboard+paste fallback works
+- [Resolved]: Model download race condition fixed via computed Binding
+- [Resolved]: History tab icon visibility fixed via explicit TabView tags
 - [Note]: Using Whisper multilingual instead of PhoWhisper - lower Vietnamese accuracy but supports both languages
 - [Note]: HotkeyService has separate statusPanel instance - acceptable for UI isolation
 
 ## Session Continuity
 
-Last session: 2026-01-17T17:29:02Z
-Stopped at: Completed 04-03-PLAN.md (Model Size Selection) - All plans complete
+Last session: 2026-01-18T17:33:00Z
+Stopped at: Completed 04-05-PLAN.md (UAT Gap Closure) - All plans complete, UAT passed
 Resume file: None
