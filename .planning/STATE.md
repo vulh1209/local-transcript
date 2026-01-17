@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-17)
 ## Current Position
 
 Phase: 4 of 4 (Polish)
-Plan: 1 of 3 in current phase - COMPLETE
+Plan: 2 of 3 in current phase - COMPLETE
 Status: In progress
-Last activity: 2026-01-18 - Completed 04-01-PLAN.md (Language Mode Selection)
+Last activity: 2026-01-18 - Completed 04-02-PLAN.md (Status Feedback UI)
 
-Progress: [#######---] 78% (7 of 9 total plans)
+Progress: [########--] 89% (8 of 9 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 5 min
-- Total execution time: 34 min
+- Total execution time: 40 min
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [#######---] 78% (7 of 9 total plans)
 | 01-foundation | 2/2 | 13 min | 6.5 min |
 | 02-audio-transcription | 2/3 | 6 min | 3 min |
 | 03-system-integration | 2/2 | 9 min | 4.5 min |
-| 04-polish | 1/3 | 6 min | 6 min |
+| 04-polish | 2/3 | 12 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4 min), 03-01 (4 min), 03-02 (5 min), 04-01 (6 min)
-- Trend: Consistent ~5 min per plan
+- Last 5 plans: 03-01 (4 min), 03-02 (5 min), 04-01 (6 min), 04-02 (6 min)
+- Trend: Consistent ~5-6 min per plan
 
 *Updated after each plan completion*
 
@@ -67,6 +67,9 @@ Recent decisions affecting current work:
 - [04-01]: LanguageMode enum uses rawValue as display strings (Auto/Vietnamese/English)
 - [04-01]: whisperLanguageCode returns nil for auto-detect
 - [04-01]: UserDefaults directly instead of @AppStorage in @Observable classes
+- [04-02]: SF Symbols for status icons - consistent with macOS design language
+- [04-02]: Auto-dismiss for transient states (error 3s, language 1.5s)
+- [04-02]: StatusIndicatorState enum for type-safe UI state management
 
 ### Pending Todos
 
@@ -76,9 +79,10 @@ None.
 
 - [Resolved]: Text insertion edge cases in Electron apps tested - clipboard+paste fallback works
 - [Note]: Using Whisper multilingual instead of PhoWhisper - lower Vietnamese accuracy but supports both languages
+- [Note]: HotkeyService has separate statusPanel instance - acceptable for UI isolation
 
 ## Session Continuity
 
-Last session: 2026-01-18T00:22:00Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-01-18T00:22:56Z
+Stopped at: Completed 04-02-PLAN.md (Status Feedback UI)
 Resume file: None
