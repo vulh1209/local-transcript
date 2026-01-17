@@ -11,8 +11,8 @@ VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases.
 - Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Foundation** - Menu bar app shell, permissions, PhoWhisper model loading
-- [ ] **Phase 2: Audio + Transcription** - Recording pipeline and ML inference
-- [ ] **Phase 3: System Integration** - Global hotkeys, text insertion, hold-to-talk and toggle modes
+- [x] **Phase 2: Audio + Transcription** - Recording pipeline and ML inference
+- [x] **Phase 3: System Integration** - Global hotkeys, text insertion, hold-to-talk and toggle modes
 - [ ] **Phase 4: Polish** - Settings UI, model selection, transcription history
 
 ## Phase Details
@@ -46,9 +46,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Audio capture pipeline (AVAudioEngine, 16kHz conversion)
-- [ ] 02-02-PLAN.md - Recording state management and visual/audio feedback
-- [ ] 02-03-PLAN.md - SwiftWhisper integration with PhoWhisper model
+- [x] 02-01-PLAN.md - Audio capture pipeline (AVAudioEngine, 16kHz conversion)
+- [x] 02-02-PLAN.md - Recording state management and visual/audio feedback
+- [x] 02-03-PLAN.md - WhisperKit integration with PhoWhisper model
 
 ### Phase 3: System Integration
 **Goal**: User can trigger recording with global hotkey and have text inserted at cursor
@@ -63,8 +63,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md - HotkeyService (KeyboardShortcuts, hold-to-talk/toggle) + TextInsertionService (AX + clipboard)
-- [ ] 03-02-PLAN.md - Integration wiring (hotkey->recording, transcription->insertion) + Settings UI
+- [x] 03-01-PLAN.md - HotkeyService (KeyboardShortcuts, hold-to-talk/toggle) + TextInsertionService (AX + clipboard)
+- [x] 03-02-PLAN.md - Integration wiring (hotkey->recording, transcription->insertion) + Settings UI
 
 ### Phase 4: Polish
 **Goal**: User can configure model size and view transcription history
@@ -88,8 +88,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-01-17 |
-| 2. Audio + Transcription | 0/3 | Planned | - |
-| 3. System Integration | 0/2 | Planned | - |
+| 2. Audio + Transcription | 3/3 | Complete | 2026-01-17 |
+| 3. System Integration | 2/2 | Complete | 2026-01-17 |
 | 4. Polish | 0/2 | Not started | - |
 
 ---
