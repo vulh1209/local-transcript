@@ -1,4 +1,5 @@
 import SwiftUI
+import KeyboardShortcuts
 
 struct SettingsView: View {
     @Environment(AppState.self) var appState
@@ -13,6 +14,22 @@ struct SettingsView: View {
                     .onAppear {
                         appState.launchManager.syncFromSystem()
                     }
+            }
+
+            Section("Hotkey") {
+                KeyboardShortcuts.Recorder("Recording Shortcut:", name: .toggleRecording)
+
+                @Bindable var hotkeyService = appState.hotkeyService
+                Picker("Mode", selection: $hotkeyService.mode) {
+                    ForEach(RecordingMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                Text(hotkeyDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Model") {
@@ -67,7 +84,7 @@ struct SettingsView: View {
 
                 PermissionRow(
                     title: "Accessibility",
-                    description: "Required for text insertion (Phase 3)",
+                    description: "Required for text insertion and global hotkey",
                     isGranted: accessibilityGranted,
                     action: {
                         if !accessibilityGranted {
@@ -80,7 +97,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 400)
+        .frame(width: 450, height: 480)
         .onAppear {
             refreshPermissions()
         }
@@ -89,6 +106,15 @@ struct SettingsView: View {
     private func refreshPermissions() {
         micStatus = appState.permissionManager.checkMicrophonePermission()
         accessibilityGranted = appState.permissionManager.checkAccessibilityPermission()
+    }
+
+    private var hotkeyDescription: String {
+        switch appState.hotkeyService.mode {
+        case .holdToTalk:
+            return "Hold the shortcut to record, release to transcribe and insert"
+        case .toggle:
+            return "Press once to start recording, press again to stop and insert"
+        }
     }
 }
 
