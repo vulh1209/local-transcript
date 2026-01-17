@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var micStatus: PermissionManager.MicrophoneStatus = .notDetermined
     @State private var accessibilityGranted = false
     @AppStorage("languageMode") private var languageMode = LanguageMode.auto.rawValue
+    @AppStorage("selectedModel") private var selectedModel = "small"
 
     var body: some View {
         TabView {
@@ -67,18 +68,41 @@ struct SettingsView: View {
             }
 
             Section("Model") {
+                Picker("Model Size", selection: $selectedModel) {
+                    ForEach(ModelManager.availableModels) { model in
+                        HStack {
+                            Text(model.name)
+                            Spacer()
+                            Text(model.size)
+                                .foregroundStyle(.secondary)
+                        }
+                        .tag(model.id)
+                    }
+                }
+                .disabled(appState.modelManager.isLoading || appState.modelManager.isDownloading)
+                .onChange(of: selectedModel) { oldValue, newValue in
+                    guard oldValue != newValue else { return }
+                    Task {
+                        try? await appState.modelManager.switchModel(to: newValue)
+                    }
+                }
+
+                // Status row showing current state
                 HStack {
-                    Text("Whisper Small")
-                    Spacer()
                     if appState.modelManager.isModelLoaded {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.green)
                         Text("Loaded")
                             .foregroundStyle(.secondary)
-                    } else if appState.modelManager.isLoading {
+                    } else if appState.modelManager.isDownloading {
                         ProgressView()
                             .controlSize(.small)
                         Text(appState.modelManager.loadProgress)
+                            .foregroundStyle(.secondary)
+                    } else if appState.modelManager.isLoading {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Loading...")
                             .foregroundStyle(.secondary)
                     } else {
                         Image(systemName: "arrow.down.circle")
@@ -88,9 +112,20 @@ struct SettingsView: View {
                     }
                 }
 
-                Text("Model downloads automatically via WhisperKit (~250MB)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                // Download progress bar
+                if appState.modelManager.isDownloading {
+                    ProgressView(value: appState.modelManager.downloadProgress)
+                    Text("Downloading: \(Int(appState.modelManager.downloadProgress * 100))%")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // Model description
+                if let modelInfo = appState.modelManager.currentModelInfo {
+                    Text(modelInfo.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
 
                 if let error = appState.modelManager.loadError {
                     Text(error.localizedDescription)
