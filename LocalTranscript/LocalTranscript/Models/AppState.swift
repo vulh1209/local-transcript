@@ -7,4 +7,5 @@ class AppState {
     let permissionManager = PermissionManager()
     let modelManager = ModelManager()
     let launchManager = LaunchManager()
+    let audioRecorder = AudioRecorder()
 }

@@ -16,6 +16,7 @@
 		A1000009001 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000009000 /* ModelManager.swift */; };
 		A1000010001 /* SwiftWhisper in Frameworks */ = {isa = PBXBuildFile; productRef = A1000010000 /* SwiftWhisper */; };
 		A1000011001 /* LaunchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011000 /* LaunchManager.swift */; };
+		A1000012001 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000012000 /* AudioRecorder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		A1000008000 /* LocalTranscript.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LocalTranscript.entitlements; sourceTree = "<group>"; };
 		A1000009000 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		A1000011000 /* LaunchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchManager.swift; sourceTree = "<group>"; };
+		A1000012000 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +99,7 @@
 				A1000006000 /* PermissionManager.swift */,
 				A1000009000 /* ModelManager.swift */,
 				A1000011000 /* LaunchManager.swift */,
+				A1000012000 /* AudioRecorder.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -183,6 +186,7 @@
 				A1000006001 /* PermissionManager.swift in Sources */,
 				A1000009001 /* ModelManager.swift in Sources */,
 				A1000011001 /* LaunchManager.swift in Sources */,
+				A1000012001 /* AudioRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
