@@ -75,14 +75,16 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. User can choose between Whisper model sizes (tiny/base/small/medium/large)
   2. User can switch language mode with hotkey (Auto/Vietnamese/English)
-  3. App stores recent transcriptions
-  4. User can view and copy text from transcription history
+  3. Status feedback shown when blocked (downloading model, transcribing, etc.)
+  4. App stores recent transcriptions
+  5. User can view and copy text from transcription history
 **Plans**: TBD
 
 Plans:
 - [ ] 04-01: Settings panel with model selection + language mode picker
 - [ ] 04-02: Language switch hotkey (cycle Auto → Vietnamese → English)
-- [ ] 04-03: Transcription history storage and UI
+- [ ] 04-03: Status feedback UI (toast/floating indicator for: downloading, transcribing, error states)
+- [ ] 04-04: Transcription history storage and UI
 
 ## Progress
 
@@ -94,7 +96,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation | 2/2 | Complete | 2026-01-17 |
 | 2. Audio + Transcription | 3/3 | Complete | 2026-01-17 |
 | 3. System Integration | 2/2 | Complete | 2026-01-17 |
-| 4. Polish | 0/3 | Not started | - |
+| 4. Polish | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2025-01-17*
