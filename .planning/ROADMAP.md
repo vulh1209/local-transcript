@@ -27,11 +27,11 @@ VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases.
   3. App can start on login (user-configurable)
   4. PhoWhisper model loads successfully and persists across app launches
   5. Settings menu accessible from menu bar icon
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Menu bar app shell and permission handling
-- [ ] 01-02: PhoWhisper model integration and persistence
+- [ ] 01-01-PLAN.md - Menu bar app shell with SwiftUI MenuBarExtra and permission handling
+- [ ] 01-02-PLAN.md - SwiftWhisper integration, PhoWhisper model loading, login item management
 
 ### Phase 2: Audio + Transcription
 **Goal**: App can record audio and transcribe Vietnamese speech to text offline
@@ -87,11 +87,12 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/2 | Not started | - |
+| 1. Foundation | 0/2 | Planned | - |
 | 2. Audio + Transcription | 0/3 | Not started | - |
 | 3. System Integration | 0/2 | Not started | - |
 | 4. Polish | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2025-01-17*
+*Phase 1 planned: 2025-01-17*
 *Depth: quick (4 phases, 9 plans)*
