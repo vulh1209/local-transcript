@@ -3,5 +3,8 @@ import SwiftUI
 @Observable
 class AppState {
     var isRecording = false
-    var permissionManager = PermissionManager()
+
+    let permissionManager = PermissionManager()
+    let modelManager = ModelManager()
+    let launchManager = LaunchManager()
 }

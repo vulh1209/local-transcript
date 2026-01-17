@@ -7,6 +7,56 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("General") {
+                @Bindable var launchManager = appState.launchManager
+                Toggle("Start at Login", isOn: $launchManager.launchAtLogin)
+                    .onAppear {
+                        appState.launchManager.syncFromSystem()
+                    }
+            }
+
+            Section("Model") {
+                HStack {
+                    Text("PhoWhisper Medium")
+                    Spacer()
+                    if appState.modelManager.isModelLoaded {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                        Text("Loaded")
+                            .foregroundStyle(.secondary)
+                    } else if appState.modelManager.isLoading {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Loading...")
+                            .foregroundStyle(.secondary)
+                    } else if appState.modelManager.isModelFilePresent {
+                        Text("Ready to load")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text("Model not found")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if !appState.modelManager.isModelFilePresent {
+                    Text("Download model from HuggingFace and place in:\n\(appState.modelManager.modelStoragePath.path)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Button("Open Model Folder") {
+                        NSWorkspace.shared.open(appState.modelManager.modelStoragePath)
+                    }
+                }
+
+                if let error = appState.modelManager.loadError {
+                    Text(error.localizedDescription)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            }
+
             Section("Permissions") {
                 PermissionRow(
                     title: "Microphone",
@@ -39,7 +89,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 300)
+        .frame(width: 450, height: 400)
         .onAppear {
             refreshPermissions()
         }
