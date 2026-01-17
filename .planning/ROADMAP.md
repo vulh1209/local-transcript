@@ -2,7 +2,9 @@
 
 ## Overview
 
-VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases. We start with a non-sandboxed menu bar shell and PhoWhisper model loading (the architecture decisions that affect everything downstream), then build audio capture and transcription as a combined pipeline, integrate global hotkeys and text insertion for the complete user flow, and finish with settings UI and history features.
+VoiceType delivers multilingual speech-to-text dictation for macOS in four phases. We start with a non-sandboxed menu bar shell and Whisper model loading (the architecture decisions that affect everything downstream), then build audio capture and transcription as a combined pipeline, integrate global hotkeys and text insertion for the complete user flow, and finish with settings UI and history features.
+
+**Note:** Using WhisperKit with generic Whisper "small" model (multilingual) instead of PhoWhisper. Supports both Vietnamese and English.
 
 ## Phases
 
@@ -10,7 +12,7 @@ VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases.
 - Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
 
-- [x] **Phase 1: Foundation** - Menu bar app shell, permissions, PhoWhisper model loading
+- [x] **Phase 1: Foundation** - Menu bar app shell, permissions, Whisper model loading
 - [x] **Phase 2: Audio + Transcription** - Recording pipeline and ML inference
 - [x] **Phase 3: System Integration** - Global hotkeys, text insertion, hold-to-talk and toggle modes
 - [ ] **Phase 4: Polish** - Settings UI, model selection, transcription history
@@ -18,20 +20,20 @@ VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases.
 ## Phase Details
 
 ### Phase 1: Foundation
-**Goal**: App runs as menu bar app with correct architecture (non-sandboxed) and can load PhoWhisper model
+**Goal**: App runs as menu bar app with correct architecture (non-sandboxed) and can load Whisper model
 **Depends on**: Nothing (first phase)
 **Requirements**: APP-01, APP-02, APP-03, SET-02, SET-03
 **Success Criteria** (what must be TRUE):
   1. App appears in menu bar with status icon (no dock icon)
   2. App requests and handles microphone and accessibility permissions
   3. App can start on login (user-configurable)
-  4. PhoWhisper model loads successfully and persists across app launches
+  4. Whisper model loads successfully and persists across app launches
   5. Settings menu accessible from menu bar icon
 **Plans**: 2 plans
 
 Plans:
 - [x] 01-01-PLAN.md - Menu bar app shell with SwiftUI MenuBarExtra and permission handling
-- [x] 01-02-PLAN.md - SwiftWhisper integration, PhoWhisper model loading, login item management
+- [x] 01-02-PLAN.md - WhisperKit integration, Whisper model loading, login item management
 
 ### Phase 2: Audio + Transcription
 **Goal**: App can record audio and transcribe Vietnamese speech to text offline
@@ -41,14 +43,14 @@ Plans:
   1. App captures audio from microphone when recording is triggered
   2. Visual indicator shows recording state (menu bar icon change + floating indicator)
   3. Audio feedback plays on recording start and stop
-  4. Vietnamese speech is transcribed to text with high accuracy (PhoWhisper)
+  4. Speech is transcribed to text (Whisper multilingual - supports Vietnamese and English)
   5. Transcription works 100% offline with punctuation and paragraph breaks
 **Plans**: 3 plans
 
 Plans:
 - [x] 02-01-PLAN.md - Audio capture pipeline (AVAudioEngine, 16kHz conversion)
 - [x] 02-02-PLAN.md - Recording state management and visual/audio feedback
-- [x] 02-03-PLAN.md - WhisperKit integration with PhoWhisper model
+- [x] 02-03-PLAN.md - WhisperKit integration with Whisper small model (multilingual)
 
 ### Phase 3: System Integration
 **Goal**: User can trigger recording with global hotkey and have text inserted at cursor
@@ -71,7 +73,7 @@ Plans:
 **Depends on**: Phase 3
 **Requirements**: SET-01, HST-01, HST-02, HST-03
 **Success Criteria** (what must be TRUE):
-  1. User can choose between PhoWhisper model sizes (tiny/base/medium)
+  1. User can choose between Whisper model sizes (tiny/base/small/medium/large)
   2. App stores recent transcriptions
   3. User can view and copy text from transcription history
 **Plans**: TBD

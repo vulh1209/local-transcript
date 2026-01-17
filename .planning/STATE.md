@@ -45,7 +45,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - [Roadmap]: Non-sandboxed distribution (Accessibility API, CGEventTap require it)
-- [Roadmap]: PhoWhisper from day one (4.97% WER vs ~15-20% for generic Whisper)
+- [Roadmap]: Whisper small multilingual (supports Vietnamese + English, ~250MB)
 - [Roadmap]: Combined Audio + Transcription phase (natural testing boundary)
 - [01-01]: Hidden window scene must be declared before Settings scene for workaround
 - [01-01]: macOS 14+ minimum target for openSettings environment
@@ -70,8 +70,8 @@ None.
 
 ### Blockers/Concerns
 
-- [Research]: CoreML model conversion for PhoWhisper may need debugging
 - [Resolved]: Text insertion edge cases in Electron apps tested - clipboard+paste fallback works
+- [Note]: Using Whisper multilingual instead of PhoWhisper - lower Vietnamese accuracy but supports both languages
 
 ## Session Continuity
 
