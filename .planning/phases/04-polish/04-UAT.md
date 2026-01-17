@@ -82,9 +82,10 @@ skipped: 0
   fix: "Added @State selectedTab, TabView selection binding, explicit .tag() values"
   verified: 2026-01-18T06:50:00Z
 
-### Future Improvements (v2)
+### Post-UAT Polish
 
 - feedback: "Clear All button in History tab creates visual confusion (looks like 3 tabs)"
-  severity: cosmetic
-  suggestion: "Reposition Clear All button for better UI/UX"
+  status: fixed
+  fix: "Moved Clear All to fixed footer below list with Divider separator"
+  verified: 2026-01-18T06:58:00Z
   test: 8

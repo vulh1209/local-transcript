@@ -16,20 +16,24 @@ struct HistoryView: View {
                     description: Text("Your transcription history will appear here")
                 )
             } else {
-                List {
-                    ForEach(records) { record in
-                        HistoryRow(record: record)
+                VStack(spacing: 0) {
+                    List {
+                        ForEach(records) { record in
+                            HistoryRow(record: record)
+                        }
+                        .onDelete(perform: deleteRecords)
                     }
-                    .onDelete(perform: deleteRecords)
-                }
-            }
-        }
-        .toolbar {
-            if !records.isEmpty {
-                ToolbarItem {
-                    Button("Clear All", role: .destructive) {
+
+                    Divider()
+
+                    Button(role: .destructive) {
                         appState.historyManager.clearAll()
+                    } label: {
+                        Label("Clear All", systemImage: "trash")
                     }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.red)
+                    .padding(8)
                 }
             }
         }
