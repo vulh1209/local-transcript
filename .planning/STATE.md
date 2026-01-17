@@ -10,28 +10,29 @@ See: .planning/PROJECT.md (updated 2025-01-17)
 ## Current Position
 
 Phase: 2 of 4 (Audio + Transcription)
-Plan: 0 of 3 in current phase
-Status: Ready to plan Phase 2
-Last activity: 2026-01-17 - Phase 1 verified and complete
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-01-17 - Completed 02-01-PLAN.md (Audio Recording Service)
 
-Progress: [##--------] 25% (2 of 9 total plans)
+Progress: [###-------] 33% (3 of 9 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 6.5 min
-- Total execution time: 13 min
+- Total plans completed: 3
+- Average duration: 5 min
+- Total execution time: 15 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation | 2/2 | 13 min | 6.5 min |
+| 02-audio-transcription | 1/3 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (5 min), 01-02 (8 min)
-- Trend: Consistent execution time
+- Last 5 plans: 01-01 (5 min), 01-02 (8 min), 02-01 (2 min)
+- Trend: Fast execution for well-researched plans
 
 *Updated after each plan completion*
 
@@ -50,6 +51,9 @@ Recent decisions affecting current work:
 - [01-02]: Lazy model loading - load on first use, not app launch (prevents 3-5s startup freeze)
 - [01-02]: Model storage at ~/Library/Application Support/LocalTranscript/
 - [01-02]: SMAppService.mainApp for login item (reads from system state, user can change externally)
+- [02-01]: Query input format at runtime instead of hardcoding sample rate (AirPods, USB mics differ)
+- [02-01]: Convert in tap callback to avoid accumulating raw buffers
+- [02-01]: AVAudioConverter callback pattern for variable-length input handling
 
 ### Pending Todos
 
@@ -62,6 +66,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-17
-Stopped at: Phase 1 complete and verified, ready for Phase 2 planning
+Last session: 2026-01-17T14:53:20Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
