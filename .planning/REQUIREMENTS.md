@@ -105,14 +105,14 @@
 | OUT-02 | Phase 3 | Pending |
 | OUT-03 | Phase 3 | Pending |
 | SET-01 | Phase 4 | Pending |
-| SET-02 | Phase 1 | Pending |
-| SET-03 | Phase 1 | Pending |
+| SET-02 | Phase 1 | Complete |
+| SET-03 | Phase 1 | Complete |
 | HST-01 | Phase 4 | Pending |
 | HST-02 | Phase 4 | Pending |
 | HST-03 | Phase 4 | Pending |
-| APP-01 | Phase 1 | Pending |
-| APP-02 | Phase 1 | Pending |
-| APP-03 | Phase 1 | Pending |
+| APP-01 | Phase 1 | Complete |
+| APP-02 | Phase 1 | Complete |
+| APP-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 26 total

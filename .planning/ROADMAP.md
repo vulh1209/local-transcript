@@ -10,7 +10,7 @@ VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases.
 - Integer phases (1, 2, 3, 4): Planned milestone work
 - Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Foundation** - Menu bar app shell, permissions, PhoWhisper model loading
+- [x] **Phase 1: Foundation** - Menu bar app shell, permissions, PhoWhisper model loading
 - [ ] **Phase 2: Audio + Transcription** - Recording pipeline and ML inference
 - [ ] **Phase 3: System Integration** - Global hotkeys, text insertion, hold-to-talk and toggle modes
 - [ ] **Phase 4: Polish** - Settings UI, model selection, transcription history
@@ -30,8 +30,8 @@ VoiceType delivers Vietnamese speech-to-text dictation for macOS in four phases.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md - Menu bar app shell with SwiftUI MenuBarExtra and permission handling
-- [ ] 01-02-PLAN.md - SwiftWhisper integration, PhoWhisper model loading, login item management
+- [x] 01-01-PLAN.md - Menu bar app shell with SwiftUI MenuBarExtra and permission handling
+- [x] 01-02-PLAN.md - SwiftWhisper integration, PhoWhisper model loading, login item management
 
 ### Phase 2: Audio + Transcription
 **Goal**: App can record audio and transcribe Vietnamese speech to text offline
@@ -87,7 +87,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/2 | Planned | - |
+| 1. Foundation | 2/2 | ✓ Complete | 2026-01-17 |
 | 2. Audio + Transcription | 0/3 | Not started | - |
 | 3. System Integration | 0/2 | Not started | - |
 | 4. Polish | 0/2 | Not started | - |
