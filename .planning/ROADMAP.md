@@ -69,18 +69,20 @@ Plans:
 - [x] 03-02-PLAN.md - Integration wiring (hotkey->recording, transcription->insertion) + Settings UI
 
 ### Phase 4: Polish
-**Goal**: User can configure model size and view transcription history
+**Goal**: User can configure model size, switch languages, and view transcription history
 **Depends on**: Phase 3
 **Requirements**: SET-01, HST-01, HST-02, HST-03
 **Success Criteria** (what must be TRUE):
   1. User can choose between Whisper model sizes (tiny/base/small/medium/large)
-  2. App stores recent transcriptions
-  3. User can view and copy text from transcription history
+  2. User can switch language mode with hotkey (Auto/Vietnamese/English)
+  3. App stores recent transcriptions
+  4. User can view and copy text from transcription history
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: Settings panel with model selection
-- [ ] 04-02: Transcription history storage and UI
+- [ ] 04-01: Settings panel with model selection + language mode picker
+- [ ] 04-02: Language switch hotkey (cycle Auto → Vietnamese → English)
+- [ ] 04-03: Transcription history storage and UI
 
 ## Progress
 
@@ -92,7 +94,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation | 2/2 | Complete | 2026-01-17 |
 | 2. Audio + Transcription | 3/3 | Complete | 2026-01-17 |
 | 3. System Integration | 2/2 | Complete | 2026-01-17 |
-| 4. Polish | 0/2 | Not started | - |
+| 4. Polish | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2025-01-17*
