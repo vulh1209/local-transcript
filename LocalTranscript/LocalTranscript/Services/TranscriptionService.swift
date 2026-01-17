@@ -67,9 +67,20 @@ class TranscriptionService {
         // Ensure model is loaded (lazy loading)
         if !modelManager.isModelLoaded {
             print("[StartRecording] Loading model...")
-            // Show downloading indicator (indeterminate progress since ModelManager doesn't have progress callbacks yet)
+            // Show downloading indicator with progress updates
             showStatusPanel(.downloading(progress: 0))
+
+            // Set up progress callback to update status panel
+            modelManager.onDownloadProgress = { [weak self] progress in
+                Task { @MainActor [weak self] in
+                    self?.showStatusPanel(.downloading(progress: progress))
+                }
+            }
+
             try await modelManager.loadModel()
+
+            // Clear progress callback after loading
+            modelManager.onDownloadProgress = nil
             print("[StartRecording] Model loaded")
         }
 
