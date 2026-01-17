@@ -28,6 +28,7 @@
 		A1000020001 /* LanguageMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000020000 /* LanguageMode.swift */; };
 		A1000023001 /* TranscriptionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000023000 /* TranscriptionRecord.swift */; };
 		A1000024001 /* HistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000024000 /* HistoryManager.swift */; };
+		A1000025001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000025000 /* HistoryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,7 @@
 		A1000020000 /* LanguageMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageMode.swift; sourceTree = "<group>"; };
 		A1000023000 /* TranscriptionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionRecord.swift; sourceTree = "<group>"; };
 		A1000024000 /* HistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryManager.swift; sourceTree = "<group>"; };
+		A1000025000 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 				A1000004000 /* HiddenWindowView.swift */,
 				A1000013000 /* FloatingIndicator.swift */,
 				A1000014000 /* StatusIndicatorPanel.swift */,
+				A1000025000 /* HistoryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -239,6 +242,7 @@
 				A1000020001 /* LanguageMode.swift in Sources */,
 				A1000023001 /* TranscriptionRecord.swift in Sources */,
 				A1000024001 /* HistoryManager.swift in Sources */,
+				A1000025001 /* HistoryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

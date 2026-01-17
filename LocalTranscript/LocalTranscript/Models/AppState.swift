@@ -7,6 +7,7 @@ class AppState {
     let launchManager = LaunchManager()
     let audioRecorder = AudioRecorder()
     let hotkeyService = HotkeyService()
+    let historyManager = HistoryManager()
 
     // TranscriptionService coordinates everything
     // Note: Cannot use lazy var with @Observable macro, so using @ObservationIgnored

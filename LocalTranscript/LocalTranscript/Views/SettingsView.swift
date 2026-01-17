@@ -8,6 +8,24 @@ struct SettingsView: View {
     @AppStorage("languageMode") private var languageMode = LanguageMode.auto.rawValue
 
     var body: some View {
+        TabView {
+            generalTab
+                .tabItem {
+                    Label("General", systemImage: "gear")
+                }
+
+            historyTab
+                .tabItem {
+                    Label("History", systemImage: "clock")
+                }
+        }
+        .frame(width: 500, height: 550)
+        .onAppear {
+            refreshPermissions()
+        }
+    }
+
+    private var generalTab: some View {
         Form {
             Section("General") {
                 @Bindable var launchManager = appState.launchManager
@@ -113,9 +131,19 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 560)
-        .onAppear {
-            refreshPermissions()
+    }
+
+    @ViewBuilder
+    private var historyTab: some View {
+        if let container = appState.historyManager.container {
+            HistoryView()
+                .modelContainer(container)
+        } else {
+            ContentUnavailableView(
+                "History Unavailable",
+                systemImage: "exclamationmark.triangle",
+                description: Text("Failed to load history database")
+            )
         }
     }
 
