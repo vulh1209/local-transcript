@@ -18,7 +18,11 @@ class AppState {
         if let service = _transcriptionService {
             return service
         }
-        let service = TranscriptionService(audioRecorder: audioRecorder, modelManager: modelManager)
+        let service = TranscriptionService(
+            audioRecorder: audioRecorder,
+            modelManager: modelManager,
+            historyManager: historyManager
+        )
         _transcriptionService = service
         return service
     }

@@ -27,12 +27,15 @@ class TranscriptionService {
 
     private let audioRecorder: AudioRecorder
     private let modelManager: ModelManager
+    private let historyManager: HistoryManager?
     private let textInsertionService = TextInsertionService()
     @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
+    @ObservationIgnored private var recordingStartTime: Date?
 
-    init(audioRecorder: AudioRecorder, modelManager: ModelManager) {
+    init(audioRecorder: AudioRecorder, modelManager: ModelManager, historyManager: HistoryManager? = nil) {
         self.audioRecorder = audioRecorder
         self.modelManager = modelManager
+        self.historyManager = historyManager
     }
 
     var isRecording: Bool {
@@ -76,6 +79,9 @@ class TranscriptionService {
         // Show status panel
         showStatusPanel(.recording)
 
+        // Track recording start time for duration calculation
+        recordingStartTime = Date()
+
         // Start recording
         print("[StartRecording] Starting audio recorder...")
         try audioRecorder.startRecording()
@@ -117,6 +123,14 @@ class TranscriptionService {
             logger.info("Transcription result: '\(text)'")
             lastTranscription = text
             state = .completed(text)
+
+            // Save to history
+            if let historyManager = historyManager, let startTime = recordingStartTime {
+                let duration = Date().timeIntervalSince(startTime)
+                let mode = LanguageMode(rawValue: languageMode) ?? .auto
+                historyManager.save(text: text, languageMode: mode.rawValue, duration: duration)
+                logger.info("Saved to history (duration: \(duration)s)")
+            }
 
             // Hide status panel on success
             hideStatusPanel()
