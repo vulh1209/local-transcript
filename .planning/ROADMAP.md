@@ -43,12 +43,12 @@ Plans:
   3. Audio feedback plays on recording start and stop
   4. Vietnamese speech is transcribed to text with high accuracy (PhoWhisper)
   5. Transcription works 100% offline with punctuation and paragraph breaks
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Audio capture pipeline (AVAudioEngine, 16kHz conversion)
-- [ ] 02-02: Recording state management and visual/audio feedback
-- [ ] 02-03: SwiftWhisper integration with PhoWhisper model
+- [ ] 02-01-PLAN.md - Audio capture pipeline (AVAudioEngine, 16kHz conversion)
+- [ ] 02-02-PLAN.md - Recording state management and visual/audio feedback
+- [ ] 02-03-PLAN.md - SwiftWhisper integration with PhoWhisper model
 
 ### Phase 3: System Integration
 **Goal**: User can trigger recording with global hotkey and have text inserted at cursor
@@ -87,12 +87,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 2/2 | ✓ Complete | 2026-01-17 |
-| 2. Audio + Transcription | 0/3 | Not started | - |
+| 1. Foundation | 2/2 | Complete | 2026-01-17 |
+| 2. Audio + Transcription | 0/3 | Planned | - |
 | 3. System Integration | 0/2 | Not started | - |
 | 4. Polish | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2025-01-17*
 *Phase 1 planned: 2025-01-17*
+*Phase 2 planned: 2026-01-17*
 *Depth: quick (4 phases, 9 plans)*
