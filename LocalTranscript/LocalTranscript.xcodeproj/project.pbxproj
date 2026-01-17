@@ -21,6 +21,8 @@
 		A1000014001 /* FloatingIndicatorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000014000 /* FloatingIndicatorPanel.swift */; };
 		A1000015001 /* AudioFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000015000 /* AudioFeedback.swift */; };
 		A1000016001 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000016000 /* TranscriptionService.swift */; };
+		A1000017001 /* HotkeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000017000 /* HotkeyService.swift */; };
+		A1000018001 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = A1000018000 /* KeyboardShortcuts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +42,7 @@
 		A1000014000 /* FloatingIndicatorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingIndicatorPanel.swift; sourceTree = "<group>"; };
 		A1000015000 /* AudioFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFeedback.swift; sourceTree = "<group>"; };
 		A1000016000 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
+		A1000017000 /* HotkeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +51,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000010001 /* WhisperKit in Frameworks */,
+				A1000018001 /* KeyboardShortcuts in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +116,7 @@
 				A1000011000 /* LaunchManager.swift */,
 				A1000012000 /* AudioRecorder.swift */,
 				A1000016000 /* TranscriptionService.swift */,
+				A1000017000 /* HotkeyService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -142,6 +147,7 @@
 			name = LocalTranscript;
 			packageProductDependencies = (
 				A1000010000 /* WhisperKit */,
+				A1000018000 /* KeyboardShortcuts */,
 			);
 			productName = LocalTranscript;
 			productReference = A1000000000 /* LocalTranscript.app */;
@@ -173,6 +179,7 @@
 			mainGroup = A1200000000;
 			packageReferences = (
 				A1600000000 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				A1600001000 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
 			);
 			productRefGroup = A1200002000 /* Products */;
 			projectDirPath = "";
@@ -211,6 +218,7 @@
 				A1000014001 /* FloatingIndicatorPanel.swift in Sources */,
 				A1000015001 /* AudioFeedback.swift in Sources */,
 				A1000016001 /* TranscriptionService.swift in Sources */,
+				A1000017001 /* HotkeyService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -423,6 +431,14 @@
 				minimumVersion = 0.9.0;
 			};
 		};
+		A1600001000 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -430,6 +446,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A1600000000 /* XCRemoteSwiftPackageReference "WhisperKit" */;
 			productName = WhisperKit;
+		};
+		A1000018000 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1600001000 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
