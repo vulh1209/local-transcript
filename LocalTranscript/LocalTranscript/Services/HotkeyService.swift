@@ -1,9 +1,11 @@
 import Foundation
 import KeyboardShortcuts
+import AppKit
 
-// Register shortcut name with default key combination
+// Register shortcut names with default key combinations
 extension KeyboardShortcuts.Name {
     static let toggleRecording = Self("toggleRecording", default: .init(.space, modifiers: [.option]))
+    static let cycleLanguage = Self("cycleLanguage", default: .init(.l, modifiers: [.option]))
 }
 
 enum RecordingMode: String, CaseIterable {
@@ -23,6 +25,7 @@ class HotkeyService {
     private var isRecording = false
     private var onStart: (() async throws -> Void)?
     private var onStop: (() async -> Void)?
+    @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
 
     init() {
         // Load saved mode
@@ -30,6 +33,45 @@ class HotkeyService {
            let mode = RecordingMode(rawValue: savedMode) {
             self.mode = mode
         }
+
+        // Register language cycle hotkey
+        KeyboardShortcuts.onKeyUp(for: .cycleLanguage) { [weak self] in
+            Task { @MainActor in
+                self?.cycleLanguageMode()
+            }
+        }
+    }
+
+    /// Cycles through language modes: Auto -> Vietnamese -> English -> Auto
+    @MainActor
+    private func cycleLanguageMode() {
+        let currentRaw = UserDefaults.standard.string(forKey: "languageMode") ?? LanguageMode.auto.rawValue
+        let current = LanguageMode(rawValue: currentRaw) ?? .auto
+
+        let next: LanguageMode
+        switch current {
+        case .auto:
+            next = .vietnamese
+        case .vietnamese:
+            next = .english
+        case .english:
+            next = .auto
+        }
+
+        UserDefaults.standard.set(next.rawValue, forKey: "languageMode")
+        print("[HotkeyService] Language mode changed to: \(next.rawValue)")
+
+        // Show brief visual feedback
+        showLanguageChangeFeedback(next)
+    }
+
+    @MainActor
+    private func showLanguageChangeFeedback(_ mode: LanguageMode) {
+        if statusPanel == nil {
+            statusPanel = StatusIndicatorPanel()
+        }
+        statusPanel?.updateState(.languageChanged(mode.rawValue))
+        statusPanel?.orderFront(nil)
     }
 
     func bind(onStart: @escaping () async throws -> Void, onStop: @escaping () async -> Void) {

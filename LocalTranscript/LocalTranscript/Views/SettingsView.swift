@@ -5,6 +5,7 @@ struct SettingsView: View {
     @Environment(AppState.self) var appState
     @State private var micStatus: PermissionManager.MicrophoneStatus = .notDetermined
     @State private var accessibilityGranted = false
+    @AppStorage("languageMode") private var languageMode = LanguageMode.auto.rawValue
 
     var body: some View {
         Form {
@@ -28,6 +29,21 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
 
                 Text(hotkeyDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Language") {
+                Picker("Language Mode", selection: $languageMode) {
+                    ForEach(LanguageMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                KeyboardShortcuts.Recorder("Cycle Language:", name: .cycleLanguage)
+
+                Text("Auto-detect or force specific language. Cycle with hotkey.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -97,7 +113,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 480)
+        .frame(width: 450, height: 560)
         .onAppear {
             refreshPermissions()
         }
