@@ -60,11 +60,11 @@ Plans:
   3. Global hotkey works from any app
   4. User can configure custom hotkey
   5. Transcribed text is inserted at cursor in any macOS app (with clipboard fallback)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Global hotkey capture (CGEventTap, hold-to-talk state machine)
-- [ ] 03-02: Text insertion service (AXUIElement with clipboard fallback)
+- [ ] 03-01-PLAN.md - HotkeyService (KeyboardShortcuts, hold-to-talk/toggle) + TextInsertionService (AX + clipboard)
+- [ ] 03-02-PLAN.md - Integration wiring (hotkey->recording, transcription->insertion) + Settings UI
 
 ### Phase 4: Polish
 **Goal**: User can configure model size and view transcription history
@@ -89,11 +89,12 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-01-17 |
 | 2. Audio + Transcription | 0/3 | Planned | - |
-| 3. System Integration | 0/2 | Not started | - |
+| 3. System Integration | 0/2 | Planned | - |
 | 4. Polish | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2025-01-17*
 *Phase 1 planned: 2025-01-17*
 *Phase 2 planned: 2026-01-17*
+*Phase 3 planned: 2026-01-17*
 *Depth: quick (4 phases, 9 plans)*
