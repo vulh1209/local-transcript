@@ -151,10 +151,10 @@ class TranscriptionService {
 
         print("[Transcribe] Starting with \(samples.count) samples")
 
-        // Configure for Vietnamese language
+        // Auto-detect language (supports Vietnamese, English, and other languages)
         let options = DecodingOptions(
             task: .transcribe,
-            language: "vi",  // Vietnamese
+            language: nil,  // Auto-detect
             temperatureFallbackCount: 3,
             sampleLength: 224,
             usePrefillPrompt: true,

@@ -27,7 +27,7 @@ class ModelManager {
     }
 
     /// Load WhisperKit model. Downloads automatically if not present.
-    /// Uses "small" model for good Vietnamese accuracy.
+    /// Uses "small" model - multilingual, auto-detects Vietnamese/English.
     func loadModel() async throws {
         guard whisperKit == nil, !isLoading else { return }
 
