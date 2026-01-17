@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-17)
 
 **Core value:** Noi tieng Viet, ra text chinh xac, khong can internet.
-**Current focus:** Phase 3 - System Integration (COMPLETE)
+**Current focus:** Phase 4 - Polish (In Progress)
 
 ## Current Position
 
-Phase: 3 of 4 (System Integration) - COMPLETE
-Plan: 2 of 2 in current phase - COMPLETE
-Status: Phase complete
-Last activity: 2026-01-17 - Completed 03-02-PLAN.md (Service Wiring)
+Phase: 4 of 4 (Polish)
+Plan: 1 of 3 in current phase - COMPLETE
+Status: In progress
+Last activity: 2026-01-18 - Completed 04-01-PLAN.md (Language Mode Selection)
 
-Progress: [######----] 67% (6 of 9 total plans)
+Progress: [#######---] 78% (7 of 9 total plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 5 min
-- Total execution time: 28 min
+- Total execution time: 34 min
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [######----] 67% (6 of 9 total plans)
 | 01-foundation | 2/2 | 13 min | 6.5 min |
 | 02-audio-transcription | 2/3 | 6 min | 3 min |
 | 03-system-integration | 2/2 | 9 min | 4.5 min |
+| 04-polish | 1/3 | 6 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (2 min), 02-02 (4 min), 03-01 (4 min), 03-02 (5 min)
-- Trend: Fast execution for well-researched plans
+- Last 5 plans: 02-02 (4 min), 03-01 (4 min), 03-02 (5 min), 04-01 (6 min)
+- Trend: Consistent ~5 min per plan
 
 *Updated after each plan completion*
 
@@ -63,6 +64,9 @@ Recent decisions affecting current work:
 - [03-01]: 50ms delay before paste to ensure clipboard sync
 - [03-02]: Text insertion after state update - UI updates first, then insert
 - [03-02]: Insertion failure non-blocking - text remains on clipboard for manual paste
+- [04-01]: LanguageMode enum uses rawValue as display strings (Auto/Vietnamese/English)
+- [04-01]: whisperLanguageCode returns nil for auto-detect
+- [04-01]: UserDefaults directly instead of @AppStorage in @Observable classes
 
 ### Pending Todos
 
@@ -75,6 +79,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-17T16:35:00Z
-Stopped at: Completed 03-02-PLAN.md (Phase 3 complete)
+Last session: 2026-01-18T00:22:00Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
