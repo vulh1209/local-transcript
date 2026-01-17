@@ -155,6 +155,12 @@ class TranscriptionService {
         state = .idle
     }
 
+    /// Show language change feedback (for Plan 01's hotkey to call)
+    @MainActor
+    func showLanguageChanged(_ mode: String) {
+        showStatusPanel(.languageChanged(mode))
+    }
+
     // MARK: - Private
 
     private func transcribe(samples: [Float]) async throws -> String {
