@@ -17,7 +17,8 @@ struct LocalTranscriptApp: App {
             MenuBarView()
                 .environment(appState)
         } label: {
-            Image(systemName: "waveform")
+            Image(systemName: appState.isRecording ? "waveform.circle.fill" : "waveform")
+                .symbolEffect(.pulse, isActive: appState.isRecording)
         }
         .menuBarExtraStyle(.menu)
 
