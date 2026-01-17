@@ -1,5 +1,6 @@
 import Foundation
 
+@Observable
 class PermissionManager {
-    // Placeholder - will be implemented in Task 3
+    // Placeholder - will be fully implemented in Task 3
 }
