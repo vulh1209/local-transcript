@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 04-polish
 source: [04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md, 04-04-SUMMARY.md]
 started: 2026-01-18T01:00:00Z
@@ -76,17 +76,25 @@ skipped: 0
   reason: "User reported: switch modal medium and notthing hahapen"
   severity: major
   test: 7
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Race condition - @AppStorage in SettingsView writes to UserDefaults before onChange fires, so ModelManager.switchModel() guard clause sees same value and returns early"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Views/SettingsView.swift"
+      issue: "@AppStorage('selectedModel') at line 9 creates race condition with ModelManager"
+    - path: "LocalTranscript/LocalTranscript/Services/ModelManager.swift"
+      issue: "Guard clause at line 129 compares against already-updated UserDefaults value"
+  missing:
+    - "Remove @AppStorage from SettingsView, bind directly to ModelManager.selectedModel"
+  debug_session: "agent:aebd929"
 
 - truth: "History tab is visible alongside General in Settings"
   status: failed
   reason: "User reported: ko thấy icon history nhưng click vào kế bên general thì có chuyển sang tab history"
   severity: minor
   test: 8
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "macOS Settings scene + TabView with conditional @ViewBuilder in historyTab causes SwiftUI to fail rendering toolbar tab item"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Views/SettingsView.swift"
+      issue: "historyTab at lines 171-183 uses conditional @ViewBuilder which breaks toolbar tab rendering"
+  missing:
+    - "Add explicit .tag() values and selection binding to TabView"
+  debug_session: "agent:aeb1c13"
