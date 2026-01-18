@@ -1,199 +1,395 @@
-# Feature Research
+# Features Research: VoiceType v1.1
 
-**Domain:** macOS Vietnamese Speech-to-Text Dictation App
-**Researched:** 2026-01-17
-**Confidence:** MEDIUM (based on WebSearch verified against official sources and GitHub repos)
+**Domain:** macOS Vietnamese Speech-to-Text Enhancement
+**Researched:** 2026-01-18
+**Confidence:** MEDIUM (based on WebSearch verified against official sources)
 
-## Feature Landscape
+---
 
-### Table Stakes (Users Expect These)
+## 1. Custom Vocabulary with Phonetic Hints
 
-Features users assume exist. Missing these = product feels incomplete.
+**Goal:** Allow users to teach the app words like "iu-ai" -> "UI", "cờ-lốt" -> "Claude"
+
+### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Hold-to-talk activation** | Primary input mode; users expect immediate recording when holding key | LOW | Standard macOS hotkey pattern. Similar to Easy Voice Input's Fn hold. |
-| **Toggle on/off mode** | Users need hands-free option for longer dictation | LOW | Secondary mode. Press once to start, press again to stop. |
-| **Global hotkey configuration** | Works from any app without switching | LOW | macOS accessibility permission required. Standard pattern. |
-| **Text insertion at cursor** | Core function - text must appear where user is typing | MEDIUM | Requires accessibility API. Can use paste fallback. |
-| **Visual recording indicator** | Users must know when mic is active | LOW | Menu bar icon state change, waveform, or pulsing indicator. PulseScribe: "spinners are useless." |
-| **Audio feedback on start/stop** | Confirm recording state without looking | LOW | Optional sounds on start, stop, insert. Dictop does this well. |
-| **Offline operation** | Core value proposition; no internet dependency | LOW | Using local Whisper/PhoWhisper models. Already decided. |
-| **Basic punctuation handling** | "Hello comma how are you" should insert comma | MEDIUM | Whisper handles this automatically for most cases. |
-| **Multi-line text support** | Paragraphs, not just single lines | LOW | Include newline/paragraph voice commands or natural pause detection. |
-| **Settings persistence** | Preferences saved between sessions | LOW | macOS UserDefaults standard pattern. |
+| **Word list input** | Users need to add custom terms | LOW | Simple list UI in settings |
+| **Exact match replacement** | "claude" should become "Claude" consistently | LOW | Post-transcription string replacement |
+| **Case preservation** | Maintain capitalization rules | LOW | Superwhisper does case-insensitive matching with specified output case |
+| **Persistence** | Vocabulary saved between sessions | LOW | UserDefaults or JSON file |
 
-### Differentiators (Competitive Advantage)
-
-Features that set the product apart. Not required, but valuable.
+### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **PhoWhisper model option** | State-of-art Vietnamese accuracy (4.67 WER vs Whisper's higher) | MEDIUM | VinAI's fine-tuned model. 5 sizes available (39M-1.55B params). Key differentiator for Vietnamese users. |
-| **Vietnamese tone handling** | Proper diacritics and tonal marks | LOW | PhoWhisper trained on 844hr Vietnamese data with diverse accents. Automatic with right model. |
-| **Custom vocabulary** | Technical terms, names, jargon for "vibe coding" | MEDIUM | Superwhisper/Wispr Flow both have this. Essential for developer workflows with project-specific terms. |
-| **Developer-optimized mode** | Prompts formatted for AI tools (Cursor, Claude) | MEDIUM | Speechly has "Prompt Mode" for this. Format output for AI consumption. |
-| **Per-app insertion modes** | Paste vs keystroke simulation per target app | MEDIUM | Some apps handle paste differently. IDEs may need keystroke simulation. |
-| **Transcription history** | Review/reuse recent transcriptions | LOW | Pipit combines clipboard + transcription history. Useful for repeated phrases. |
-| **Low resource usage** | Minimal CPU/RAM when idle | MEDIUM | Wispr Flow criticized for 800MB RAM, 8% CPU when idle. Opportunity to be lighter. |
-| **Model selection UI** | Choose between speed (tiny) vs accuracy (large) | LOW | Let users pick PhoWhisper tiny/base/small/medium/large based on their hardware. |
-| **Bilingual Vietnamese-English** | Handle code-switching common in dev work | HIGH | Recent research (2025) on cross-lingual phoneme recognition. PhoWhisper encoder can be leveraged. |
+| **Phonetic hints to model** | Pass vocabulary to Whisper's initial_prompt for better recognition | MEDIUM | WhisperKit supports `prompt` parameter. Limited to 224 tokens. |
+| **Two-stage approach** | AI hints + post-processing replacement | MEDIUM | Superwhisper pattern: vocabulary words guide transcription, replacements fix remaining errors |
+| **Import/export vocabulary** | Share vocabulary across devices or users | LOW | JSON export/import |
+| **Developer preset vocabulary** | Built-in terms for "vibe coding" (API, UI, CLI, Claude, Cursor, GitHub) | LOW | High value for target audience |
+| **Multiple replacement targets** | "iu-ai", "you-ai", "UI" all map to "UI" | LOW | Handle common misrecognitions |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+### Anti-Features
 
-Features that seem good but create problems.
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Phonetic spelling system** | Complex IPA input is intimidating; Whisper prompting is unreliable for phonetics | Use text hints ("iu-ai") directly; rely on post-processing replacement |
+| **Auto-learning vocabulary** | Requires ML complexity; inconsistent results | Manual vocabulary management; let users explicitly add words |
+| **Unlimited vocabulary size** | Too many words confuse Whisper model; 224 token limit for prompts | Recommend max 20-50 words; warn users about diminishing returns |
+| **Per-app vocabulary** | Over-engineering; users rarely need this | Single global vocabulary; let users manage manually |
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| **Real-time streaming transcription** | "See words as I speak" | Distracting, restricts movement, increases complexity. Users noted it's "exciting initially but distracting in practice." | Show brief processing indicator, then insert complete text. |
-| **Cloud AI post-processing (LLM cleanup)** | Better grammar, remove filler words | Breaks offline-only promise. Adds latency. Privacy concerns. Cloud costs. | Optional local LLM mode if user brings their own. Not in MVP. |
-| **Auto-punctuation learning** | "Learn my punctuation style" | Inconsistent results, users report frustration. Apple dictation "doesn't reliably learn from corrections." | Use Whisper's built-in punctuation; provide manual overrides. |
-| **Voice commands for editing** | "Delete last word", "go back" | Significant complexity, requires NLU layer, conflicts with actual dictation. | Use keyboard for editing. Focus on doing one thing well. |
-| **Multi-speaker support** | Meetings, pair programming | Out of scope for single-user dictation. Adds complexity. | Keep scope to single-user voice typing. |
-| **Automatic language switching** | Detect when user switches languages | Unreliable detection, causes errors. Users report multi-language as "all but unusable" with Apple. | Manual mode selection, or optimize for Vietnamese with English fallback. |
-| **Always-on listening** | "Hey assistant" wake word | Battery drain, privacy concerns, complexity. Not needed for active dictation. | Explicit activation via hotkey only. |
-| **Auto-send/auto-submit** | Automatically submit forms | Dangerous - no opportunity to review. Users report Apple dictation changing correct words to incorrect. | Always require explicit user action to send. |
+### Implementation Notes
+
+**Whisper Prompt Approach (HIGH confidence - official docs):**
+- Pass custom vocabulary as "glossary" in initial_prompt: `"Glossary: Claude, UI, GitHub, Cursor"`
+- Whisper uses this to bias spelling but not guaranteed
+- Only first 224 tokens of prompt are used
+- Per OpenAI Cookbook: "These techniques are not especially reliable, but can be useful in some situations"
+
+**Post-Processing Approach (HIGH confidence - Superwhisper docs):**
+- Programmatic string replacement after transcription
+- Case-insensitive matching, specified output case
+- 100% reliable for exact matches
+- Superwhisper recommends using BOTH: vocabulary for AI hints, replacements for consistency
+
+**Recommended Architecture:**
+1. Vocabulary words -> sent to WhisperKit prompt parameter
+2. Replacements -> post-processing after transcription
+3. Same UI can configure both (word -> replacement mapping)
+
+### Sources
+
+- [OpenAI Whisper Prompting Guide](https://cookbook.openai.com/examples/whisper_prompting_guide) - Official prompting techniques
+- [Superwhisper Vocabulary Docs](https://superwhisper.com/docs/get-started/interface-vocabulary) - Two-stage approach
+- [WhisperKit GitHub](https://github.com/argmaxinc/WhisperKit) - Prompt parameter support
+- [Argmax Custom Vocabulary](https://www.argmaxinc.com/blog/whisperkit) - Enterprise SDK feature
+
+---
+
+## 2. Auto-Translate Vietnamese to English
+
+**Goal:** Toggle in settings; speak Vietnamese, output English text
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **Translation toggle** | Clear on/off in settings or menu bar | LOW | Simple boolean setting |
+| **Offline operation** | Must work without internet | HIGH | Requires local translation model or Whisper's built-in translation |
+| **Quality threshold** | Output should be usable, not perfect | MEDIUM | Developer dictation tolerance for imperfect translation |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **Whisper native translation** | Whisper has built-in transcribe-to-English task | LOW | Already supported in Whisper; translate vs transcribe task |
+| **Per-transcription toggle** | Switch between transcribe/translate on the fly | LOW | Menu bar quick toggle |
+| **Show original + translation** | Display both in history for verification | LOW | Useful for learning or verification |
+| **Translation quality indicator** | Confidence score or "rough translation" label | MEDIUM | Set expectations appropriately |
+
+### Anti-Features
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Cloud translation API** | Breaks offline requirement; privacy concerns | Use Whisper's native translation task |
+| **Post-transcription translation** | Two-step adds latency and error compounding | Single-step Whisper translation |
+| **Multiple target languages** | Over-engineering for target audience | English only (developer workflow focus) |
+| **Real-time translation display** | Distracting; Whisper processes full audio | Show result after completion |
+| **Grammar correction on translation** | Requires additional LLM; breaks offline | Accept Whisper's raw translation output |
+
+### Implementation Notes
+
+**Whisper Translation Task (HIGH confidence - official Whisper):**
+- Whisper natively supports `task: translate` which outputs English regardless of input language
+- Same model, different decoding task
+- Quality varies by language; Vietnamese-to-English is reasonably good for conversational content
+- Per OpenAI: "Whisper can translate speech from any language to English"
+
+**WhisperKit Implementation:**
+- Need to verify WhisperKit exposes the translate task (vs transcribe-only)
+- If supported, simply toggle task parameter
+- If not supported, would need alternative approach (OUT OF SCOPE for offline)
+
+**Quality Expectations:**
+- Translation is functional, not literary
+- Good for: developer notes, AI prompts, technical content
+- Weak for: idiomatic expressions, cultural nuance
+- Set user expectations appropriately in UI
+
+### Sources
+
+- [OpenAI Whisper](https://github.com/openai/whisper) - Translation task documentation
+- [Whisper Paper](https://openai.com/index/whisper/) - Multilingual and translation capabilities
+- [Soniox Vietnamese Translation](https://soniox.com/speech-to-text/vietnamese) - Competitive reference
+
+---
+
+## 3. Audio Auto-Segmentation on Silence
+
+**Goal:** In toggle mode, auto-insert text when user pauses; don't wait for manual stop
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **Silence threshold** | Configurable pause duration to trigger insertion | LOW | 1.5-3 seconds typical |
+| **Natural pause detection** | Don't segment mid-sentence on brief pauses | MEDIUM | VAD + timing heuristics |
+| **Visual feedback** | Show when segment is about to be finalized | LOW | Countdown or indicator |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **VAD-based segmentation** | Use actual voice activity detection, not just volume | MEDIUM | WhisperKit includes VAD; Silero VAD is industry standard |
+| **Configurable threshold** | Let users tune pause duration (1-5 seconds) | LOW | Slider in settings |
+| **Smart continuation** | If user resumes speaking during finalization, cancel and continue | MEDIUM | Better UX for natural speech patterns |
+| **Segment preview** | Show pending text before insertion, allowing cancel | MEDIUM | Review buffer before commit |
+
+### Anti-Features
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Aggressive segmentation** | Segments mid-sentence on natural pauses; frustrating | Use longer default threshold (2-3 seconds); bias toward completion |
+| **No manual override** | Users sometimes want to pause and think | Keep manual stop hotkey always available |
+| **Auto-send after segment** | Dangerous; user should review before submission | Auto-insert to text field only; never auto-submit forms |
+| **Complex VAD tuning UI** | Overwhelming for users | Simple slider (1-5 seconds); hide technical details |
+| **Word-level streaming** | Distracting; increases complexity | Full-segment insertion after silence |
+
+### Implementation Notes
+
+**VAD Options (HIGH confidence - verified):**
+
+1. **WhisperKit Built-in VAD:**
+   - WhisperKit advertises "voice activity detection" as a feature
+   - Need to verify API exposure for custom threshold control
+
+2. **Silero VAD (MEDIUM confidence - widely used):**
+   - Industry standard, 1.8MB model, ~1ms per 30ms chunk
+   - Parameters: `positiveSpeechThreshold` (0.5), `negativeSpeechThreshold` (0.35)
+   - Can be layered on top of WhisperKit audio pipeline
+
+**Recommended Parameters:**
+- Default silence threshold: 2.0 seconds
+- Minimum valid segment: 0.5 seconds (avoid noise triggers)
+- Pre-speech padding: 300ms (capture word starts)
+- User-configurable range: 1.0 - 5.0 seconds
+
+**UX Flow:**
+1. User activates toggle mode
+2. Audio continuously captured and analyzed by VAD
+3. When speech detected, start segment
+4. When silence exceeds threshold, finalize segment
+5. Show brief "inserting..." indicator
+6. Transcribe and insert segment
+7. Continue listening for next segment
+8. Manual stop hotkey ends session
+
+### Sources
+
+- [Picovoice VAD Guide 2025](https://picovoice.ai/blog/complete-guide-voice-activity-detection-vad/) - Comprehensive VAD overview
+- [Silero VAD GitHub](https://github.com/snakers4/silero-vad) - Implementation reference
+- [Deepgram Endpointing](https://developers.deepgram.com/docs/understanding-end-of-speech-detection) - Speech-to-silence detection patterns
+- [WhisperX VAD](https://deepwiki.com/m-bain/whisperX/4.1-voice-activity-detection) - VAD + Whisper integration
+
+---
+
+## 4. Better English Detection in Vietnamese Speech
+
+**Goal:** Improve transcription of English words when speaking Vietnamese (code-switching)
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **Handle common English words** | "GitHub", "Claude", "API" should transcribe correctly | MEDIUM | Use vocabulary prompting for common terms |
+| **Preserve English spelling** | Don't convert English to Vietnamese phonetics | MEDIUM | Whisper multilingual should handle this |
+| **Consistent behavior** | Same word should transcribe the same way each time | MEDIUM | Harder than it sounds with code-switching |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **Developer vocabulary preset** | Pre-loaded terms for coding: API, CLI, UI, GitHub, npm, etc. | LOW | High value for target audience |
+| **Prompt engineering for mixed speech** | Include English terms in prompt to bias recognition | LOW | "Common terms: GitHub, Claude, API, npm, React, TypeScript" |
+| **Post-processing for known terms** | Fix common misrecognitions | LOW | "git hub" -> "GitHub", "a.p" -> "API" |
+
+### Anti-Features
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Automatic language switching** | Unreliable; causes errors in both languages | Stay in Vietnamese mode; use vocabulary hints |
+| **Word-level language detection** | Very hard problem; research-level complexity | Treat as Vietnamese with English vocabulary |
+| **Dual-model approach** | Run both Vietnamese and English models | Single multilingual Whisper with prompting |
+| **Real-time language detection** | Adds latency; error-prone | Use consistent mode throughout segment |
+
+### Implementation Notes
+
+**The Challenge (MEDIUM confidence - research):**
+- Vietnamese-English code-switching is an active research area
+- Recent paper (TSPC 2025): 19.9% WER on Vietnamese-English code-switching
+- Challenge: "both distinct phonological features and ambiguity from similar sound recognition"
+- No production-ready solution for true code-switching
+
+**Practical Approach for v1.1:**
+1. **Vocabulary prompting:** Include common English terms in Whisper prompt
+2. **Post-processing:** String replacement for known terms
+3. **Language mode:** Keep Vietnamese as primary; English terms handled as vocabulary
+4. **Don't promise true code-switching:** Set expectations appropriately
+
+**Whisper Behavior:**
+- Whisper multilingual is trained on code-switched speech
+- Vietnamese -> Whisper tends to transcribe English words phonetically or romanized
+- Prompting with English terms helps but isn't guaranteed
+- Larger models (medium, large) handle code-switching better
+
+**Recommended Strategy:**
+1. Use Whisper large-v3-turbo for best multilingual performance
+2. Include developer vocabulary in prompt
+3. Post-process common misrecognitions
+4. Document limitations clearly
+5. Let users add their own vocabulary for specific terms
+
+### Sources
+
+- [TSPC Vietnamese-English Code-Switching](https://arxiv.org/abs/2509.05983) - Research on code-switching ASR
+- [VietMix Corpus](https://arxiv.org/html/2505.24472v1) - Vietnamese-English code-mixing data
+- [Whisper Multilingual](https://huggingface.co/openai/whisper-large-v3) - Model capabilities
+- [WhisperKit Language Detection](https://github.com/argmaxinc/WhisperKit) - Auto-detect features
+
+---
 
 ## Feature Dependencies
 
 ```
-[Menu Bar App Shell]
+[Custom Vocabulary]
     |
-    +---> [Global Hotkey System]
+    +---> [Vocabulary UI in Settings]
     |         |
-    |         +---> [Hold-to-Talk Mode]
+    |         +---> [Word list storage (UserDefaults/JSON)]
+    |
+    +---> [Prompt construction for WhisperKit]
     |         |
-    |         +---> [Toggle Mode]
+    |         +---> [Token limit handling (224 tokens)]
     |
-    +---> [Audio Capture]
+    +---> [Post-processing replacement]
+              |
+              +---> [Text insertion service]
+
+[Auto-Translate]
+    |
+    +---> [WhisperKit translate task]
     |         |
-    |         +---> [Whisper/PhoWhisper Engine]
-    |                   |
-    |                   +---> [Text Processing]
-    |                             |
-    |                             +---> [Text Insertion]
-    |                                       |
-    |                                       +---> [Clipboard Paste Method]
-    |                                       |
-    |                                       +---> [Accessibility Type Method]
+    |         +---> [Verify API support]
     |
-    +---> [Visual Indicator]
+    +---> [Toggle UI (settings + menu bar)]
     |
-    +---> [Settings UI]
+    +---> [History display (original + translation)]
+
+[Auto-Segmentation]
+    |
+    +---> [VAD integration]
+    |         |
+    |         +---> [WhisperKit VAD or Silero VAD]
+    |
+    +---> [Silence threshold logic]
+    |         |
+    |         +---> [Timer + state machine]
+    |
+    +---> [Segment finalization flow]
+    |         |
+    |         +---> [Transcription queue]
+    |         |
+    |         +---> [Text insertion]
+    |
+    +---> [Toggle mode enhancement]
+
+[Better English Detection]
+    |
+    +---> [Developer vocabulary preset]
+    |         |
+    |         +---> [Custom Vocabulary feature]
+    |
+    +---> [Prompt engineering]
+    |         |
+    |         +---> [Custom Vocabulary feature]
+    |
+    +---> [Post-processing rules]
               |
-              +---> [Model Selection]
-              |
-              +---> [Hotkey Configuration]
-              |
-              +---> [Custom Vocabulary] (depends on Text Processing)
+              +---> [Custom Vocabulary feature]
 ```
 
-### Dependency Notes
+### Dependency Analysis
 
-- **Hold-to-Talk requires Global Hotkey System:** Must capture keyDown and keyUp events
-- **Toggle Mode requires Global Hotkey System:** Must toggle state on keyDown
-- **Text Insertion requires Accessibility permission:** For paste OR keystroke simulation
-- **Model Selection requires Settings UI:** User must be able to choose model
-- **Custom Vocabulary enhances Text Processing:** Post-processing step before insertion
-- **PhoWhisper Engine requires model download:** First-run experience must handle this
+| Feature | Depends On | Can Be Built Independently |
+|---------|-----------|---------------------------|
+| Custom Vocabulary | Nothing | YES - Foundation feature |
+| Auto-Translate | WhisperKit translate task support | YES - Verify first |
+| Auto-Segmentation | VAD implementation | YES - New subsystem |
+| Better English Detection | Custom Vocabulary | NO - Build vocabulary first |
 
-## MVP Definition
-
-### Launch With (v1)
-
-Minimum viable product - what's needed to validate the concept.
-
-- [x] **Menu bar app shell** - Resident app with status indicator
-- [x] **Hold-to-talk activation** - Primary input mode, core UX
-- [x] **Toggle on/off mode** - Secondary mode for longer dictation
-- [x] **Global hotkey (configurable)** - User can set preferred key combo
-- [x] **Audio capture and transcription** - Using PhoWhisper-small or -base
-- [x] **Text insertion at cursor** - Via clipboard paste (most compatible)
-- [x] **Visual recording indicator** - Menu bar icon change
-- [x] **Audio feedback** - Start/stop sounds
-- [x] **Basic settings** - Model selection, hotkey config
-
-### Add After Validation (v1.x)
-
-Features to add once core is working.
-
-- [ ] **Custom vocabulary** - Add when users request specific terms
-- [ ] **Transcription history** - Add when users want to review/reuse
-- [ ] **Per-app insertion modes** - Add when specific app issues reported
-- [ ] **Multiple model sizes** - Start with one, add options based on feedback
-- [ ] **Developer-optimized mode** - Add when vibe-coding workflow validated
-
-### Future Consideration (v2+)
-
-Features to defer until product-market fit is established.
-
-- [ ] **Bilingual Vietnamese-English** - Complex, needs more research
-- [ ] **Local LLM post-processing** - Only if users bring their own models
-- [ ] **Export/backup settings** - Nice for power users, not essential
-
-## Feature Prioritization Matrix
-
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Hold-to-talk | HIGH | LOW | P1 |
-| Toggle mode | HIGH | LOW | P1 |
-| Text insertion | HIGH | MEDIUM | P1 |
-| Visual indicator | HIGH | LOW | P1 |
-| Audio feedback | MEDIUM | LOW | P1 |
-| PhoWhisper integration | HIGH | MEDIUM | P1 |
-| Hotkey configuration | MEDIUM | LOW | P1 |
-| Model selection | MEDIUM | LOW | P2 |
-| Custom vocabulary | MEDIUM | MEDIUM | P2 |
-| Transcription history | LOW | LOW | P2 |
-| Per-app insertion | LOW | MEDIUM | P3 |
-| Bilingual mode | LOW | HIGH | P3 |
-
-**Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
-
-## Competitor Feature Analysis
-
-| Feature | Apple Dictation | Superwhisper | Wispr Flow | VoiceInk | **Our Approach** |
-|---------|-----------------|--------------|------------|----------|------------------|
-| Offline | Partial (some languages) | Yes (local models) | No (cloud) | Yes | **Yes (core value)** |
-| Vietnamese | Generic Whisper | Generic Whisper | Cloud ASR | Generic Whisper | **PhoWhisper (optimized)** |
-| Hold-to-talk | No | Unknown | No | Unknown | **Yes (primary mode)** |
-| Toggle mode | Yes (keyboard shortcut) | Yes | Yes | Yes | **Yes (secondary mode)** |
-| Custom vocabulary | No | Yes | Yes | Unknown | **v1.x** |
-| LLM cleanup | No | Yes (cloud) | Yes (cloud) | No | **No (offline purity)** |
-| Price | Free | $15/mo or $149/yr | $12-15/mo | $25 one-time | **TBD (likely one-time)** |
-| Developer focus | No | Partial | Yes (vibe coding) | No | **Yes (prompt mode v1.x)** |
-
-### Competitive Positioning
-
-**Unique value proposition:** The only offline macOS dictation app optimized specifically for Vietnamese with PhoWhisper models.
-
-- vs **Apple Dictation**: Better Vietnamese accuracy, hold-to-talk mode, always offline
-- vs **Superwhisper/Wispr Flow**: Truly offline (no cloud dependency), Vietnamese-optimized
-- vs **VoiceInk**: Vietnamese-specific model (PhoWhisper vs generic Whisper)
-
-## Sources
-
-### Official/High Confidence
-- [PhoWhisper GitHub](https://github.com/VinAIResearch/PhoWhisper) - Vietnamese ASR model details, benchmarks
-- [PhoWhisper Paper](https://arxiv.org/abs/2406.02555) - 844hr training data, WER benchmarks
-- [Apple Dictation Support](https://support.apple.com/guide/mac-help/use-dictation-mh40584/mac) - Built-in macOS dictation features
-- [Superwhisper Docs](https://superwhisper.com/docs/modes/custom) - Mode system, custom vocabulary
-
-### Market Research/Medium Confidence
-- [TechCrunch Dictation Apps 2025](https://techcrunch.com/2025/12/30/the-best-ai-powered-dictation-apps-of-2025/) - Market overview
-- [Wispr Flow Pricing](https://wisprflow.ai/pricing) - Feature comparison
-- [Vibe Coding Overview](https://wisprflow.ai/vibe-coding) - Developer workflow context
-- [Addy Osmani on Speech-to-Code](https://addyo.substack.com/p/speech-to-code-vibe-coding-with-voice) - Developer dictation patterns
-
-### UX Research/Medium Confidence
-- [Apple Community - Dictation Complaints](https://discussions.apple.com/thread/256079092) - Common user frustrations
-- [PulseScribe](https://pulsescribe.me) - Visual indicator UX patterns
-- [Dictop](https://dictop.com/) - Audio feedback patterns
-- [Easy Voice Input](https://tianyu19920816.github.io/VoiceInputApp/) - Hold-to-talk pattern
+**Recommended Build Order:**
+1. **Custom Vocabulary** - Foundation for other features
+2. **Better English Detection** - Uses vocabulary, high value for target users
+3. **Auto-Translate** - Independent, verify WhisperKit support
+4. **Auto-Segmentation** - Most complex, can be deferred if needed
 
 ---
-*Feature research for: Vietnamese Speech-to-Text macOS App*
-*Researched: 2026-01-17*
+
+## Feature Prioritization for v1.1
+
+| Feature | User Value | Implementation Cost | Risk | Priority |
+|---------|------------|---------------------|------|----------|
+| Custom Vocabulary | HIGH | LOW-MEDIUM | LOW | P1 |
+| Better English Detection | HIGH | LOW | LOW | P1 |
+| Auto-Translate | MEDIUM | LOW-MEDIUM | MEDIUM (verify API) | P2 |
+| Auto-Segmentation | MEDIUM | HIGH | MEDIUM (UX tuning) | P2 |
+
+**Priority Rationale:**
+- **P1 Custom Vocabulary:** Foundation feature, enables other improvements, direct user value
+- **P1 Better English Detection:** High value for target audience (developers), builds on vocabulary
+- **P2 Auto-Translate:** Nice-to-have, verify WhisperKit support before committing
+- **P2 Auto-Segmentation:** Highest complexity, needs UX iteration, can defer to v1.2 if needed
+
+---
+
+## Competitor Feature Matrix
+
+| Feature | Superwhisper | Wispr Flow | MacWhisper | VoiceInk | **VoiceType v1.1** |
+|---------|--------------|------------|------------|----------|-------------------|
+| Custom Vocabulary | Yes (AI hints + replacements) | Yes | Unknown | Unknown | **Planned** |
+| Phonetic Hints | No | Unknown | Unknown | Unknown | **No (post-processing instead)** |
+| Translation | Yes (cloud) | Yes (cloud) | Yes | Unknown | **Whisper native (offline)** |
+| Auto-Segment | Unknown | Unknown | Unknown | Unknown | **Planned** |
+| Code-Switching | Generic | Generic | Generic | Generic | **Developer vocabulary preset** |
+| Offline | Yes | No | Yes | Yes | **Yes (core value)** |
+
+**Competitive Positioning for v1.1:**
+- **vs Superwhisper:** Similar vocabulary approach; advantage in offline translation
+- **vs Wispr Flow:** Advantage in offline operation; similar developer focus
+- **vs MacWhisper:** More specialized for Vietnamese + developer workflow
+- **Unique:** Offline Vietnamese STT with developer vocabulary and native translation
+
+---
+
+## Sources Summary
+
+### HIGH Confidence (Official Documentation)
+- [WhisperKit GitHub](https://github.com/argmaxinc/WhisperKit) - Feature support, API
+- [OpenAI Whisper Prompting Guide](https://cookbook.openai.com/examples/whisper_prompting_guide) - Vocabulary techniques
+- [Superwhisper Vocabulary Docs](https://superwhisper.com/docs/get-started/interface-vocabulary) - Two-stage approach
+- [Silero VAD GitHub](https://github.com/snakers4/silero-vad) - VAD implementation
+
+### MEDIUM Confidence (Verified WebSearch)
+- [Picovoice VAD Guide](https://picovoice.ai/blog/complete-guide-voice-activity-detection-vad/) - VAD concepts
+- [Deepgram Endpointing](https://developers.deepgram.com/docs/understanding-end-of-speech-detection) - Silence detection
+- [TechCrunch Dictation Apps 2025](https://techcrunch.com/2025/12/30/the-best-ai-powered-dictation-apps-of-2025/) - Market context
+
+### LOW Confidence (Research/Single Source)
+- [TSPC Vietnamese-English ASR](https://arxiv.org/abs/2509.05983) - Code-switching research
+- [VietMix Corpus](https://arxiv.org/html/2505.24472v1) - Code-mixing data
+- [Argmax Custom Vocabulary](https://www.argmaxinc.com/blog/whisperkit) - Enterprise SDK features
+
+---
+
+*Feature research for: VoiceType v1.1 Smart Dictation*
+*Researched: 2026-01-18*
