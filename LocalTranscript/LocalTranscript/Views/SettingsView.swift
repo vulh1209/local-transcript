@@ -57,33 +57,35 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Section("Auto-Segment") {
-                Picker("Mode", selection: $segmentMode) {
-                    ForEach(SegmentMode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode.rawValue)
-                    }
-                }
-                .pickerStyle(.segmented)
+            // Auto-segment section only visible when Toggle Mode is enabled (UAT Test 8)
+            if appState.hotkeyService.mode == .toggle {
+                Section("Auto-Segment") {
+                    // Toggle switch instead of picker (UAT Test 9 - no redundant Manual option)
+                    Toggle("Enable Auto-Segment", isOn: Binding(
+                        get: { segmentMode == SegmentMode.auto.rawValue },
+                        set: { segmentMode = $0 ? SegmentMode.auto.rawValue : SegmentMode.manual.rawValue }
+                    ))
 
-                if segmentMode == SegmentMode.auto.rawValue {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text("Silence Threshold")
-                            Spacer()
-                            Text(String(format: "%.1fs", silenceThreshold))
-                                .foregroundStyle(.secondary)
+                    if segmentMode == SegmentMode.auto.rawValue {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text("Silence Threshold")
+                                Spacer()
+                                Text(String(format: "%.1fs", silenceThreshold))
+                                    .foregroundStyle(.secondary)
+                            }
+                            Slider(value: $silenceThreshold, in: 1.0...5.0, step: 0.5)
                         }
-                        Slider(value: $silenceThreshold, in: 1.0...5.0, step: 0.5)
+
+                        Text("Time of silence before auto-inserting text. Shorter = faster insertion, longer = fewer interruptions.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
 
-                    Text("Time of silence before auto-inserting text. Shorter = faster insertion, longer = fewer interruptions.")
+                    Text(segmentModeDescription)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-
-                Text(segmentModeDescription)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Section("Language") {

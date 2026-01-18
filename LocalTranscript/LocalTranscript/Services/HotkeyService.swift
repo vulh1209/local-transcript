@@ -17,6 +17,11 @@ enum RecordingMode: String, CaseIterable {
 class HotkeyService {
     var mode: RecordingMode = .holdToTalk {
         didSet {
+            // Stop active recording before switching modes (UAT Test 10)
+            if isRecording {
+                isRecording = false
+                Task { await onStop?() }
+            }
             UserDefaults.standard.set(mode.rawValue, forKey: "recordingMode")
             rebindHandlers()
         }
