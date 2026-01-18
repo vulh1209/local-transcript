@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-auto-translate
 source: [05-01-SUMMARY.md]
 started: 2026-01-18T11:00:00Z
-updated: 2026-01-18T11:05:00Z
+updated: 2026-01-18T11:10:00Z
 ---
 
 ## Current Test
@@ -46,9 +46,14 @@ skipped: 1
 ## Gaps
 
 - truth: "After a translated transcription, open History. The entry should show a blue 'EN' badge to indicate it was translated."
-  status: failed
+  status: fixed
   reason: "User reported: history unavaiable"
   severity: major
   test: 4
-  artifacts: []
-  missing: []
+  root_cause: "SwiftData schema migration failure - wasTranslated property missing default value in stored property declaration"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Models/TranscriptionRecord.swift"
+      issue: "wasTranslated: Bool needed default value for lightweight migration"
+  missing:
+    - "Add = false to wasTranslated stored property"
+  fix_commit: ea16297
