@@ -25,9 +25,10 @@ Progress: [################] 100% (v1.0: 4/4 phases, v1.1: 2/2 phases)
 
 ## v1.1 Summary
 
-- 2 phases, 4 plans completed
+- 2 phases, 5 plans completed (including gap closure)
 - 11/11 requirements shipped
 - Auto-translate + Auto-segment features delivered
+- UAT bugs fixed in 06-04 gap closure plan
 
 ## v1.1 Progress
 
@@ -50,17 +51,22 @@ Progress: [################] 100% (v1.0: 4/4 phases, v1.1: 2/2 phases)
   - Silence threshold slider (1-5s configurable)
   - StatusIndicatorState for continuous recording and segment detection
   - StatusIndicatorPanel visual feedback
+- Plan 04: Gap Closure - COMPLETE (2 min)
+  - Fixed fire-and-forget Task around insertTextAtCursor
+  - Fixed missing showStatusPanel(.continuousRecording) call
+  - Closes UAT issues 3, 4, 5, 6
 - Requirements delivered: SEG-01, SEG-02, SEG-03, SEG-04, SEG-05, SEG-06, SEG-07
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (v1.0: 12, v1.1: 4)
-- Average duration: ~22 min
+- Total plans completed: 17 (v1.0: 12, v1.1: 5)
+- Average duration: ~20 min
 - v1.1 Plan 05-01: 8 min
 - v1.1 Plan 06-01: 6 min
 - v1.1 Plan 06-02: 5 min
 - v1.1 Plan 06-03: 3 min
+- v1.1 Plan 06-04: 2 min (gap closure)
 
 ## Accumulated Context
 
@@ -83,6 +89,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Mode routing in startRecording() based on isContinuousMode
 - Segment detection flash uses 0.5s auto-dismiss delay
 - Continuous recording state carries pendingSegments as associated value
+- MainActor.run async continuation: return Bool flag, await outside closure
 
 ### Pending Todos
 
@@ -95,12 +102,13 @@ All resolved.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed v1.1 milestone
+Stopped at: Completed 06-04-PLAN.md (gap closure)
 Resume file: None
 
 ## Next Steps
 
-Run `/gsd:audit-milestone` to verify cross-phase integration and E2E flows before archiving.
+1. Run UAT retest to verify fixes for Tests 3, 4, 5, 6
+2. Run `/gsd:audit-milestone` to verify cross-phase integration and E2E flows before archiving
 
 ---
-*Updated: 2026-01-18 after Phase 6 completion - v1.1 milestone complete*
+*Updated: 2026-01-18 after 06-04 gap closure - UAT fixes complete*
