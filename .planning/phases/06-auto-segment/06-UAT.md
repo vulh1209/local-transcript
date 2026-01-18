@@ -1,9 +1,11 @@
 ---
-status: diagnosed
+status: complete
 phase: 06-auto-segment
-source: 06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md, 06-04-SUMMARY.md
-started: 2026-01-18T02:30:00Z
-updated: 2026-01-18T03:30:00Z
+source: 06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md, 06-04-SUMMARY.md, 06-05-SUMMARY.md
+started: 2026-01-18T03:45:00Z
+updated: 2026-01-18T04:00:00Z
+retest: true
+previous_issues: 4 (Tests 7-10)
 ---
 
 ## Current Test
@@ -12,118 +14,80 @@ updated: 2026-01-18T03:30:00Z
 
 ## Tests
 
-### 1. Settings Mode Picker
-expected: Settings > Auto-Segment section shows picker with Manual/Auto options
+### 1. Auto-Segment UI Visibility
+expected: Auto-Segment settings section only visible when Toggle Mode is selected. Hidden in Hold-to-Talk mode.
 result: pass
 
-### 2. Silence Threshold Slider
-expected: When Auto mode selected, slider appears below picker (1-5 seconds range). When Manual selected, slider hidden.
+### 2. Auto-Segment Toggle Switch
+expected: In Toggle Mode, Auto-Segment section shows a toggle switch (not a picker). Enable/disable auto-segment with single tap.
 result: pass
 
-### 3. Continuous Recording Start (RETEST)
-expected: In Auto mode, transcribed segment text should be inserted at cursor position (not just saved to history)
-result: pass
-note: "User feedback - segments dính chữ, cần thêm space/separator giữa các đoạn (enhancement)"
-
-### 4. Segment Detection Flash (RETEST)
-expected: After segment transcription completes, status indicator should transition properly (not get stuck on "transcribing")
+### 3. Silence Threshold Slider
+expected: When Auto-Segment enabled, slider appears below (1-5 seconds range, 0.5s steps). When disabled, slider hidden.
 result: pass
 
-### 5. Pending Segments Count (RETEST)
-expected: During continuous recording, status indicator shows current state (not stuck on transcribing)
-result: pass
-
-### 6. Auto-Insert on Silence (RETEST)
-expected: Auto-insert text at cursor after silence detection - text should appear where you're typing, not just in history
-result: pass
-
-### 7. Whisper Hallucination on Long Silence
-expected: Extended silence should not produce hallucinated text
+### 4. Continuous Recording Start
+expected: With Auto-Segment enabled, press hotkey to start recording. Status indicator shows "Listening..." state (not transcribing).
 result: issue
-reported: "Nếu mà silent lâu quá thì sẽ ra một đoạn text là hãy subscribe kênh Ghiền Mì Gõ"
-severity: major
-
-### 8. Auto-Segment UI Visibility
-expected: Auto-segment settings should only show when Toggle Mode is enabled
-result: issue
-reported: "Auto-segment chỉ hiển thị và cho setup khi bật toggle mode chứ ko phải luôn hiển thị"
+reported: "not, still 'recording'"
 severity: minor
 
-### 9. Manual Mode Redundancy in Toggle Mode
-expected: When Toggle Mode is on, Manual option in auto-segment picker should not appear (redundant)
-result: issue
-reported: "khi bật toggle mode thì sẽ ko có manual mode trong auto-segment nữa"
-severity: minor
+### 5. Auto-Insert on Silence
+expected: Speak, then stay silent for threshold duration. Text should be transcribed AND inserted at cursor position automatically.
+result: pass
 
-### 10. Mode Switch Does Not Stop Recording
-expected: Switching from Toggle Mode to Hold-to-Talk should stop any active recording
+### 6. Status Indicator Transitions
+expected: After segment transcription completes, status indicator returns to "Recording" (not stuck on "Transcribing").
+result: pass
+
+### 7. Whisper Hallucination Prevention
+expected: Start auto-segment, stay completely silent for extended period (10+ seconds). Should NOT produce hallucinated text like "subscribe to channel" etc.
 result: issue
-reported: "khi switch về hold to talk ko tự stop recording của toggle"
+reported: "vẫn bị ảo tưởng khi không nói gì, dù xài model large"
 severity: major
+
+### 8. Pending Segments Queue
+expected: While one segment is transcribing, speak again to queue another. Status should show pending count if applicable.
+result: pass
+
+### 9. Mode Switch Stops Recording
+expected: Start recording in Toggle Mode. Switch Hotkey Mode to "Hold to Talk". Active recording should stop immediately.
+result: pass
+
+### 10. Manual Mode Still Works
+expected: Disable Auto-Segment (or use Hold-to-Talk mode). Hold hotkey, speak, release. Traditional manual transcription works as before.
+result: pass
 
 ## Summary
 
 total: 10
-passed: 6
-issues: 4
+passed: 8
+issues: 2
 pending: 0
 skipped: 0
 
 ## Gaps
 
+- truth: "Status indicator shows 'Listening...' state in continuous recording mode"
+  status: failed
+  reason: "User reported: not, still 'recording'"
+  severity: minor
+  test: 4
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
 - truth: "Extended silence should not produce hallucinated text"
   status: failed
-  reason: "User reported: Nếu mà silent lâu quá thì sẽ ra một đoạn text là hãy subscribe kênh Ghiền Mì Gõ"
+  reason: "User reported: vẫn bị ảo tưởng khi không nói gì, dù xài model large"
   severity: major
   test: 7
-  root_cause: "No audio energy validation - handleSegment() only checks !samples.isEmpty. WhisperKit metrics (noSpeechProb, avgLogprob) ignored."
-  artifacts:
-    - path: "LocalTranscript/LocalTranscript/Services/TranscriptionService.swift"
-      issue: "Line 282: No RMS energy check before transcription. Line 450: Discards noSpeechProb metric"
-  missing:
-    - "Add RMS energy threshold check (reject if rms < 0.01)"
-    - "Add post-filter using WhisperKit noSpeechProb > 0.7"
-  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
-
-- truth: "Auto-segment settings should only show when Toggle Mode is enabled"
-  status: failed
-  reason: "User reported: Auto-segment chỉ hiển thị và cho setup khi bật toggle mode chứ ko phải luôn hiển thị"
-  severity: minor
-  test: 8
-  root_cause: "Auto-Segment Section at line 60 has no conditional rendering based on appState.hotkeyService.mode"
-  artifacts:
-    - path: "LocalTranscript/LocalTranscript/Views/SettingsView.swift"
-      issue: "Line 60: Section rendered unconditionally"
-  missing:
-    - "Wrap Section with: if appState.hotkeyService.mode == .toggle"
-  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
-
-- truth: "Manual option should not appear in auto-segment when Toggle Mode is on"
-  status: failed
-  reason: "User reported: khi bật toggle mode thì sẽ ko có manual mode trong auto-segment nữa"
-  severity: minor
-  test: 9
-  root_cause: "Picker uses SegmentMode.allCases showing both manual/auto. Since section only shows in toggle mode, picker is redundant."
-  artifacts:
-    - path: "LocalTranscript/LocalTranscript/Views/SettingsView.swift"
-      issue: "Line 62-68: Picker shows all cases including manual"
-  missing:
-    - "Replace picker with toggle switch 'Enable Auto-Segment' or remove picker entirely"
-  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
-
-- truth: "Switching from Toggle Mode to Hold-to-Talk should stop active recording"
-  status: failed
-  reason: "User reported: khi switch về hold to talk ko tự stop recording của toggle"
-  severity: major
-  test: 10
-  root_cause: "HotkeyService.mode setter only calls rebindHandlers(), does not stop active recording first"
-  artifacts:
-    - path: "LocalTranscript/LocalTranscript/Services/HotkeyService.swift"
-      issue: "Lines 18-23: mode.didSet missing stop-recording logic"
-  missing:
-    - "Add to mode.didSet: if isRecording { isRecording = false; Task { await onStop?() } }"
-  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
 
 ## Enhancement Notes
 
-- User feedback on Test 3: segments dính chữ vào nhau - cần thêm space/separator giữa các đoạn (future enhancement for v1.2)
+- Previous feedback on Test 3: segments dính chữ - cần thêm space/separator giữa các đoạn (future enhancement for v1.2)
