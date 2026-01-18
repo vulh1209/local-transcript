@@ -8,7 +8,7 @@ final class TranscriptionRecord {
     var timestamp: Date
     var languageMode: String
     var duration: TimeInterval  // Recording duration in seconds
-    var wasTranslated: Bool
+    var wasTranslated: Bool = false
 
     init(text: String, languageMode: String, duration: TimeInterval, wasTranslated: Bool = false) {
         self.id = UUID()
