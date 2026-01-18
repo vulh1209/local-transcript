@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 06-auto-segment
 source: 06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md
 started: 2026-01-18T02:30:00Z
-updated: 2026-01-18T02:42:00Z
+updated: 2026-01-18T02:48:00Z
 ---
 
 ## Current Test
@@ -59,37 +59,49 @@ skipped: 0
   reason: "User reported: transcrib có trong history nhưng ko paste tex vào chỗ focus"
   severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Fire-and-forget Task { } in handleSegment() not awaited - insertion spawned but may not execute before outer block returns"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Services/TranscriptionService.swift"
+      issue: "Lines 318-321: Task { await self.insertTextAtCursor(text) } not awaited"
+  missing:
+    - "Directly await insertTextAtCursor() instead of spawning unawaited Task"
+  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
 
 - truth: "Status indicator transitions properly after segment detection and transcription completes"
   status: failed
   reason: "User reported: khi silent thì có hiển thị popup transcribing nhưng kẹt status ở đó luôn ko thay đổi, khi chuyển setting về manual cũng kẹt popup state luôn, phải nhấn stop recording trên menu bar mới stop được"
   severity: blocker
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Empty code block at lines 325-330 - when continuousRecording and pendingSegments==0, no state update occurs, panel stays stuck at .transcribing"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Services/TranscriptionService.swift"
+      issue: "Lines 326-327: Empty if-block with comment 'Still recording, keep status visible' does nothing"
+  missing:
+    - "Call showStatusPanel(.continuousRecording(pendingSegments: 0)) when in continuous mode and queue empty"
+  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
 
 - truth: "Pending segments count visible during continuous recording"
   status: failed
   reason: "User reported: ko thấy 2 pending, bị kẹt status transcribing trên popup hoài luôn"
   severity: major
   test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Same as Test 4 - status panel never updated back to continuousRecording state after transcription"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Services/TranscriptionService.swift"
+      issue: "Lines 325-330: Missing state transition to .continuousRecording(pendingSegments:)"
+  missing:
+    - "Fixed by same fix as Test 4"
+  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
 
 - truth: "Auto-insert text at cursor after silence detection and transcription"
   status: failed
   reason: "User reported: ko auto insert, thấy có trong history"
   severity: major
   test: 6
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Same as Test 3 - insertTextAtCursor() called in unawaited Task, may not execute"
+  artifacts:
+    - path: "LocalTranscript/LocalTranscript/Services/TranscriptionService.swift"
+      issue: "Lines 318-321: Fire-and-forget Task for text insertion"
+  missing:
+    - "Fixed by same fix as Test 3"
+  debug_session: ".claude/cache/agents/debug-agent/latest-output.md"
