@@ -25,6 +25,14 @@ class TranscriptionService {
         set { UserDefaults.standard.set(newValue, forKey: "languageMode") }
     }
 
+    @ObservationIgnored
+    private var translateMode: Bool {
+        get { UserDefaults.standard.bool(forKey: "translateMode") }
+        set { UserDefaults.standard.set(newValue, forKey: "translateMode") }
+    }
+
+    var isTranslateEnabled: Bool { translateMode }
+
     private let audioRecorder: AudioRecorder
     private let modelManager: ModelManager
     private let historyManager: HistoryManager?
@@ -201,8 +209,12 @@ class TranscriptionService {
         let whisperLanguage = mode.whisperLanguageCode
         print("[Transcribe] Language mode: \(mode.rawValue), whisper language: \(whisperLanguage ?? "auto-detect")")
 
+        // Select task based on translate mode
+        let task: DecodingTask = translateMode ? .translate : .transcribe
+        print("[Transcribe] Translate mode: \(translateMode), task: \(task)")
+
         let options = DecodingOptions(
-            task: .transcribe,
+            task: task,
             language: whisperLanguage,
             temperatureFallbackCount: 3,
             sampleLength: 224,
