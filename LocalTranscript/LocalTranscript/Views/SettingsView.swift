@@ -7,6 +7,8 @@ struct SettingsView: View {
     @State private var accessibilityGranted = false
     @AppStorage("languageMode") private var languageMode = LanguageMode.auto.rawValue
     @AppStorage("translateMode") private var translateMode = false
+    @AppStorage("segmentMode") private var segmentMode = SegmentMode.manual.rawValue
+    @AppStorage("silenceThreshold") private var silenceThreshold: Double = 2.0
     @State private var selectedTab = 0
 
     var body: some View {
@@ -51,6 +53,35 @@ struct SettingsView: View {
                 .pickerStyle(.segmented)
 
                 Text(hotkeyDescription)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Auto-Segment") {
+                Picker("Mode", selection: $segmentMode) {
+                    ForEach(SegmentMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                if segmentMode == SegmentMode.auto.rawValue {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Silence Threshold")
+                            Spacer()
+                            Text(String(format: "%.1fs", silenceThreshold))
+                                .foregroundStyle(.secondary)
+                        }
+                        Slider(value: $silenceThreshold, in: 1.0...5.0, step: 0.5)
+                    }
+
+                    Text("Time of silence before auto-inserting text. Shorter = faster insertion, longer = fewer interruptions.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Text(segmentModeDescription)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -206,6 +237,18 @@ struct SettingsView: View {
         case .toggle:
             return "Press once to start recording, press again to stop and insert"
         }
+    }
+
+    private var segmentModeDescription: String {
+        if let mode = SegmentMode(rawValue: segmentMode) {
+            switch mode {
+            case .manual:
+                return "Standard mode. Hold hotkey to record, release to transcribe."
+            case .auto:
+                return "Continuous dictation. Text automatically inserts when you pause speaking."
+            }
+        }
+        return ""
     }
 }
 
