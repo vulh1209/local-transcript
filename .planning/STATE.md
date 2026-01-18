@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 5 of 6 (Auto-Translate)
-Plan: Ready to plan
-Status: Awaiting /gsd:plan-phase 5
-Last activity: 2026-01-18 — v1.1 roadmap created
+Plan: 1 of 1 complete
+Status: Phase 5 complete
+Last activity: 2026-01-18 - Completed 05-01-PLAN.md (Auto-Translate)
 
-Progress: [###########-----] 70% (v1.0: 4/4 phases, v1.1: 0/2 phases)
+Progress: [#############---] 85% (v1.0: 4/4 phases, v1.1: 1/2 phases)
 
 ## v1.0 Summary
 
@@ -29,21 +29,29 @@ Progress: [###########-----] 70% (v1.0: 4/4 phases, v1.1: 0/2 phases)
 - 11 requirements (4 translate, 7 segment)
 - Target: auto-translate + auto-segment
 
+## v1.1 Progress
+
+### Phase 5: Auto-Translate (COMPLETE)
+- Plan 01: Auto-Translate Feature - COMPLETE (8 min)
+- Requirements delivered: TRANS-01, TRANS-02, TRANS-03, TRANS-04
+
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12 (v1.0)
-- Average duration: ~30 min
-- Total execution time: ~6 hours
-
-*v1.1 metrics will be tracked starting Phase 5*
+- Total plans completed: 13 (v1.0: 12, v1.1: 1)
+- Average duration: ~28 min
+- v1.1 Plan 05-01: 8 min
 
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-v1.0 decisions archived. v1.1 decisions pending.
+
+**v1.1 decisions (Phase 5):**
+- Use WhisperKit DecodingTask.translate for single-inference translation
+- Store translateMode in UserDefaults like existing languageMode pattern
+- SwiftData migration via default values (no explicit migration needed)
 
 ### Pending Todos
 
@@ -51,19 +59,19 @@ None.
 
 ### Blockers/Concerns
 
-- [Research]: Apple Translation API requires SwiftUI context - needs bridge pattern
+- [Research]: Apple Translation API requires SwiftUI context - needs bridge pattern (not used in Phase 5)
 - [Research]: WhisperKit `promptTokens` bug (#372) - verify status before using
-- [VERIFIED]: macOS minimum increases to **15.0+** for Translation framework (not 14.4)
+- [RESOLVED]: macOS minimum stays at **14.0+** for Phase 5 (Translation framework not used)
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: v1.1 roadmap created
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
 
 ## Next Steps
 
-Run `/gsd:plan-phase 5` to plan Auto-Translate phase.
+Run `/gsd:plan-phase 6` to plan Auto-Segment phase.
 
 ---
-*Updated: 2026-01-18 after v1.1 roadmap creation*
+*Updated: 2026-01-18 after Phase 5 Plan 01 completion*
