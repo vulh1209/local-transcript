@@ -5,13 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** Noi tieng Viet, ra text chinh xac, khong can internet.
-**Current focus:** v1.1 Smart Dictation - Phase 5 Auto-Translate
+**Current focus:** v1.1 Smart Dictation - Phase 6 Auto-Segment
 
 ## Current Position
 
-Phase: 5 of 6 (Auto-Translate)
-Plan: 1 of 1 complete
-Status: Phase 5 complete
+Phase: 6 of 6 (Auto-Segment)
+Plan: Ready to plan
+Status: Awaiting /gsd:discuss-phase 6
 Last activity: 2026-01-18 - Completed 05-01-PLAN.md (Auto-Translate)
 
 Progress: [#############---] 85% (v1.0: 4/4 phases, v1.1: 1/2 phases)
