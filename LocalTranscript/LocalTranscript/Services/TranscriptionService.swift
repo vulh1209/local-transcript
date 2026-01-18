@@ -10,6 +10,7 @@ class TranscriptionService {
     enum TranscriptionState {
         case idle
         case recording
+        case continuousRecording  // Auto-segment mode: recording with VAD active
         case transcribing
         case completed(String)
         case error(Error)
@@ -17,6 +18,9 @@ class TranscriptionService {
 
     private(set) var state: TranscriptionState = .idle
     private(set) var lastTranscription: String = ""
+
+    /// Number of segments pending transcription (for UI display per SEG-07)
+    private(set) var pendingSegments: Int = 0
 
     // Use UserDefaults directly to avoid @AppStorage conflict with @Observable macro
     @ObservationIgnored
@@ -31,14 +35,34 @@ class TranscriptionService {
         set { UserDefaults.standard.set(newValue, forKey: "translateMode") }
     }
 
+    @ObservationIgnored
+    private var segmentMode: String {
+        get { UserDefaults.standard.string(forKey: "segmentMode") ?? SegmentMode.manual.rawValue }
+        set { UserDefaults.standard.set(newValue, forKey: "segmentMode") }
+    }
+
+    @ObservationIgnored
+    private var silenceThreshold: Double {
+        get {
+            let value = UserDefaults.standard.double(forKey: "silenceThreshold")
+            return value > 0 ? value : 2.0  // Default 2.0s per SEG-01
+        }
+        set { UserDefaults.standard.set(newValue, forKey: "silenceThreshold") }
+    }
+
     var isTranslateEnabled: Bool { translateMode }
+
+    /// Whether auto-segment mode is enabled
+    var isContinuousMode: Bool { segmentMode == SegmentMode.auto.rawValue }
 
     private let audioRecorder: AudioRecorder
     private let modelManager: ModelManager
     private let historyManager: HistoryManager?
     private let textInsertionService = TextInsertionService()
+    private let transcriptionQueue = TranscriptionQueue()
     @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
     @ObservationIgnored private var recordingStartTime: Date?
+    @ObservationIgnored private var segmentStartTime: Date?
 
     init(audioRecorder: AudioRecorder, modelManager: ModelManager, historyManager: HistoryManager? = nil) {
         self.audioRecorder = audioRecorder
@@ -47,8 +71,12 @@ class TranscriptionService {
     }
 
     var isRecording: Bool {
-        if case .recording = state { return true }
-        return false
+        switch state {
+        case .recording, .continuousRecording:
+            return true
+        default:
+            return false
+        }
     }
 
     var isTranscribing: Bool {
@@ -58,39 +86,35 @@ class TranscriptionService {
 
     @MainActor
     func startRecording() async throws {
-        print("[StartRecording] Called, state = \(state)")
+        print("[StartRecording] Called, state = \(state), isContinuousMode = \(isContinuousMode)")
+
+        // Route to appropriate mode
+        if isContinuousMode {
+            try await startContinuousRecording()
+        } else {
+            try await startManualRecording()
+        }
+    }
+
+    /// Start recording in manual mode (existing behavior)
+    @MainActor
+    private func startManualRecording() async throws {
+        print("[StartManualRecording] Called, state = \(state)")
 
         // Auto-reset from terminal states (completed/error) so user can record again
         switch state {
         case .completed, .error:
-            print("[StartRecording] Auto-resetting from terminal state")
+            print("[StartManualRecording] Auto-resetting from terminal state")
             state = .idle
-        case .recording, .transcribing:
-            print("[StartRecording] Already recording/transcribing, returning")
+        case .recording, .continuousRecording, .transcribing:
+            print("[StartManualRecording] Already recording/transcribing, returning")
             return
         case .idle:
             break
         }
 
         // Ensure model is loaded (lazy loading)
-        if !modelManager.isModelLoaded {
-            print("[StartRecording] Loading model...")
-            // Show downloading indicator with progress updates
-            showStatusPanel(.downloading(progress: 0))
-
-            // Set up progress callback to update status panel
-            modelManager.onDownloadProgress = { [weak self] progress in
-                Task { @MainActor [weak self] in
-                    self?.showStatusPanel(.downloading(progress: progress))
-                }
-            }
-
-            try await modelManager.loadModel()
-
-            // Clear progress callback after loading
-            modelManager.onDownloadProgress = nil
-            print("[StartRecording] Model loaded")
-        }
+        try await ensureModelLoaded()
 
         // Play start sound
         AudioFeedback.playStartSound()
@@ -101,24 +125,86 @@ class TranscriptionService {
         // Track recording start time for duration calculation
         recordingStartTime = Date()
 
+        // Ensure auto-segment is disabled for manual mode
+        audioRecorder.isAutoSegmentEnabled = false
+
         // Start recording
-        print("[StartRecording] Starting audio recorder...")
+        print("[StartManualRecording] Starting audio recorder...")
         try audioRecorder.startRecording()
         state = .recording
-        print("[StartRecording] Now recording")
+        print("[StartManualRecording] Now recording")
+    }
+
+    /// Start recording in continuous/auto-segment mode
+    @MainActor
+    private func startContinuousRecording() async throws {
+        print("[StartContinuousRecording] Called, state = \(state)")
+
+        // Auto-reset from terminal states
+        switch state {
+        case .completed, .error:
+            print("[StartContinuousRecording] Auto-resetting from terminal state")
+            state = .idle
+        case .recording, .continuousRecording, .transcribing:
+            print("[StartContinuousRecording] Already recording/transcribing, returning")
+            return
+        case .idle:
+            break
+        }
+
+        // Ensure model is loaded
+        try await ensureModelLoaded()
+
+        // Initialize VAD if needed (show downloading state)
+        try await initializeVADIfNeeded()
+
+        // Play start sound
+        AudioFeedback.playStartSound()
+
+        // Show continuous recording status
+        showStatusPanel(.recording)
+
+        // Track recording start time
+        recordingStartTime = Date()
+        segmentStartTime = Date()
+
+        // Configure audio recorder for auto-segment mode
+        audioRecorder.isAutoSegmentEnabled = true
+        audioRecorder.silenceThreshold = silenceThreshold
+        audioRecorder.onSilenceDetected = { [weak self] samples in
+            self?.handleSegment(samples)
+        }
+
+        // Start recording
+        print("[StartContinuousRecording] Starting audio recorder with VAD...")
+        try audioRecorder.startRecording()
+        state = .continuousRecording
+        print("[StartContinuousRecording] Now continuous recording with VAD")
     }
 
     @MainActor
     func stopRecording() async {
         print("[StopRecording] Called, state = \(state)")
-        guard case .recording = state else {
+
+        switch state {
+        case .recording:
+            await stopManualRecording()
+        case .continuousRecording:
+            await stopContinuousRecording()
+        default:
             print("[StopRecording] Not recording, returning")
             return
         }
+    }
+
+    /// Stop recording in manual mode
+    @MainActor
+    private func stopManualRecording() async {
+        print("[StopManualRecording] Called")
 
         // Stop recording and get samples
         let samples = audioRecorder.stopRecording()
-        print("[StopRecording] Got \(samples.count) samples (\(Double(samples.count) / 16000.0) seconds)")
+        print("[StopManualRecording] Got \(samples.count) samples (\(Double(samples.count) / 16000.0) seconds)")
 
         // Show transcribing state
         showStatusPanel(.transcribing)
@@ -144,33 +230,112 @@ class TranscriptionService {
             state = .completed(text)
 
             // Save to history
-            if let historyManager = historyManager, let startTime = recordingStartTime {
-                let duration = Date().timeIntervalSince(startTime)
-                let mode = LanguageMode(rawValue: languageMode) ?? .auto
-                historyManager.save(
-                    text: text,
-                    languageMode: mode.rawValue,
-                    duration: duration,
-                    wasTranslated: isTranslateEnabled
-                )
-                logger.info("Saved to history (duration: \(duration)s, translated: \(self.isTranslateEnabled))")
-            }
+            saveToHistory(text: text, startTime: recordingStartTime)
 
             // Hide status panel on success
             hideStatusPanel()
 
             // Auto-insert text at cursor
-            do {
-                try await textInsertionService.insertText(text)
-                logger.info("Text inserted at cursor")
-            } catch {
-                logger.error("Text insertion failed: \(error)")
-                // Text is still on clipboard, user can paste manually
-            }
+            await insertTextAtCursor(text)
         } catch {
             logger.error("Transcription error: \(error)")
             showStatusPanel(.error(message: error.localizedDescription))
             state = .error(error)
+        }
+    }
+
+    /// Stop recording in continuous mode
+    @MainActor
+    private func stopContinuousRecording() async {
+        print("[StopContinuousRecording] Called, pendingSegments = \(pendingSegments)")
+
+        // Play stop sound
+        AudioFeedback.playStopSound()
+
+        // Stop recording and get any remaining samples
+        let samples = audioRecorder.stopRecording()
+        print("[StopContinuousRecording] Got \(samples.count) remaining samples")
+
+        // Reset audio recorder settings
+        audioRecorder.isAutoSegmentEnabled = false
+        audioRecorder.onSilenceDetected = nil
+
+        // If there are remaining samples, queue final segment
+        if !samples.isEmpty {
+            handleSegment(samples)
+        }
+
+        // If segments are still being processed, show waiting state
+        if pendingSegments > 0 {
+            showStatusPanel(.transcribing)
+            logger.info("Waiting for \(self.pendingSegments) pending segments to complete")
+            // Note: We don't block here - segments complete in background
+        } else {
+            hideStatusPanel()
+        }
+
+        state = .idle
+        print("[StopContinuousRecording] Stopped, returning to idle")
+    }
+
+    /// Handle a segment detected by VAD (called from AudioRecorder callback)
+    private func handleSegment(_ samples: [Float]) {
+        guard !samples.isEmpty else { return }
+
+        let sampleCount = samples.count
+        let duration = Double(sampleCount) / 16000.0
+        logger.info("Handling segment: \(sampleCount) samples (\(duration)s)")
+
+        // Increment pending count on main thread
+        Task { @MainActor in
+            self.pendingSegments += 1
+            // Brief visual feedback that segment was detected (SEG-03)
+            self.showStatusPanel(.transcribing)
+        }
+
+        // Queue for transcription
+        Task {
+            do {
+                let text = try await transcriptionQueue.enqueue { [weak self] in
+                    guard let self = self else { throw TranscriptionError.modelNotLoaded }
+                    return try await self.transcribe(samples: samples)
+                }
+
+                // Process result on main thread
+                await MainActor.run { [weak self] in
+                    guard let self = self else { return }
+
+                    self.pendingSegments = max(0, self.pendingSegments - 1)
+
+                    if !text.isEmpty {
+                        self.lastTranscription = text
+                        logger.info("Segment transcribed: '\(text)'")
+
+                        // Save to history
+                        self.saveToHistory(text: text, startTime: self.segmentStartTime)
+                        self.segmentStartTime = Date()
+
+                        // Insert text
+                        Task {
+                            await self.insertTextAtCursor(text)
+                        }
+                    }
+
+                    // Hide status if no more pending and not recording
+                    if self.pendingSegments == 0 {
+                        if case .continuousRecording = self.state {
+                            // Still recording, keep status visible
+                        } else {
+                            self.hideStatusPanel()
+                        }
+                    }
+                }
+            } catch {
+                await MainActor.run { [weak self] in
+                    self?.pendingSegments = max(0, (self?.pendingSegments ?? 1) - 1)
+                    logger.error("Segment transcription failed: \(error.localizedDescription)")
+                }
+            }
         }
     }
 
@@ -199,7 +364,57 @@ class TranscriptionService {
         showStatusPanel(.languageChanged(mode))
     }
 
-    // MARK: - Private
+    // MARK: - Private Helpers
+
+    @MainActor
+    private func ensureModelLoaded() async throws {
+        if !modelManager.isModelLoaded {
+            print("[EnsureModelLoaded] Loading model...")
+            showStatusPanel(.downloading(progress: 0))
+
+            modelManager.onDownloadProgress = { [weak self] progress in
+                Task { @MainActor [weak self] in
+                    self?.showStatusPanel(.downloading(progress: progress))
+                }
+            }
+
+            try await modelManager.loadModel()
+            modelManager.onDownloadProgress = nil
+            print("[EnsureModelLoaded] Model loaded")
+        }
+    }
+
+    @MainActor
+    private func initializeVADIfNeeded() async throws {
+        // Initialize VAD model if not already done
+        try await audioRecorder.initializeVAD()
+        logger.info("VAD initialized for continuous recording")
+    }
+
+    private func saveToHistory(text: String, startTime: Date?) {
+        guard let historyManager = historyManager, let startTime = startTime else { return }
+
+        let duration = Date().timeIntervalSince(startTime)
+        let mode = LanguageMode(rawValue: languageMode) ?? .auto
+        historyManager.save(
+            text: text,
+            languageMode: mode.rawValue,
+            duration: duration,
+            wasTranslated: isTranslateEnabled
+        )
+        logger.info("Saved to history (duration: \(duration)s, translated: \(self.isTranslateEnabled))")
+    }
+
+    @MainActor
+    private func insertTextAtCursor(_ text: String) async {
+        do {
+            try await textInsertionService.insertText(text)
+            logger.info("Text inserted at cursor")
+        } catch {
+            logger.error("Text insertion failed: \(error)")
+            // Text is still on clipboard, user can paste manually
+        }
+    }
 
     private func transcribe(samples: [Float]) async throws -> String {
         guard let whisperKit = modelManager.whisperKit else {

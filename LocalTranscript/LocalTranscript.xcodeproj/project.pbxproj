@@ -34,6 +34,7 @@
 		A1000028001 /* TranscriptionQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000028000 /* TranscriptionQueue.swift */; };
 		A1000029001 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = A1000029000 /* FluidAudio */; };
 		A1000030001 /* AsyncQueue in Frameworks */ = {isa = PBXBuildFile; productRef = A1000030000 /* AsyncQueue */; };
+		A1000031001 /* SegmentMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000031000 /* SegmentMode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +64,7 @@
 		A1000026000 /* VADService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VADService.swift; sourceTree = "<group>"; };
 		A1000027000 /* CircularAudioBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularAudioBuffer.swift; sourceTree = "<group>"; };
 		A1000028000 /* TranscriptionQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionQueue.swift; sourceTree = "<group>"; };
+		A1000031000 /* SegmentMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentMode.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,7 @@
 			children = (
 				A1000005000 /* AppState.swift */,
 				A1000020000 /* LanguageMode.swift */,
+				A1000031000 /* SegmentMode.swift */,
 				A1000021000 /* StatusIndicatorState.swift */,
 				A1000023000 /* TranscriptionRecord.swift */,
 			);
@@ -263,6 +266,7 @@
 				A1000026001 /* VADService.swift in Sources */,
 				A1000027001 /* CircularAudioBuffer.swift in Sources */,
 				A1000028001 /* TranscriptionQueue.swift in Sources */,
+				A1000031001 /* SegmentMode.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,19 @@ class AppState {
     let hotkeyService = HotkeyService()
     let historyManager = HistoryManager()
 
+    // VADService for auto-segment mode (lazy initialized like ModelManager)
+    @ObservationIgnored
+    private var _vadService: VADService?
+
+    var vadService: VADService {
+        if let service = _vadService {
+            return service
+        }
+        let service = VADService()
+        _vadService = service
+        return service
+    }
+
     // TranscriptionService coordinates everything
     // Note: Cannot use lazy var with @Observable macro, so using @ObservationIgnored
     @ObservationIgnored
@@ -33,7 +46,13 @@ class AppState {
     }
 
     init() {
+        setupServices()
         setupHotkeyBindings()
+    }
+
+    private func setupServices() {
+        // Inject VADService into AudioRecorder for auto-segment mode
+        audioRecorder.vadService = vadService
     }
 
     private func setupHotkeyBindings() {
