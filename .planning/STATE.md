@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** Noi tieng Viet, ra text chinh xac, khong can internet.
-**Current focus:** v1.1 Smart Dictation - Phase 6 Auto-Segment
+**Current focus:** v1.1 Smart Dictation - Complete
 
 ## Current Position
 
-Phase: 6 of 6 (Auto-Segment)
-Plan: 3 of 4 complete
-Status: In progress - Plan 04 ready
-Last activity: 2026-01-18 - Completed 06-03-PLAN.md (UI Settings)
+Phase: 6 of 6 (Auto-Segment) - COMPLETE
+Plan: All complete
+Status: v1.1 Milestone complete, awaiting audit
+Last activity: 2026-01-18 - Completed Phase 6 Auto-Segment
 
-Progress: [################] 97% (v1.0: 4/4 phases, v1.1: 1.75/2 phases)
+Progress: [################] 100% (v1.0: 4/4 phases, v1.1: 2/2 phases)
 
 ## v1.0 Summary
 
@@ -23,11 +23,11 @@ Progress: [################] 97% (v1.0: 4/4 phases, v1.1: 1.75/2 phases)
 - 1,827 LOC Swift
 - macOS 14+ Apple Silicon
 
-## v1.1 Overview
+## v1.1 Summary
 
-- 2 phases planned (Phase 5-6)
-- 11 requirements (4 translate, 7 segment)
-- Target: auto-translate + auto-segment
+- 2 phases, 4 plans completed
+- 11/11 requirements shipped
+- Auto-translate + Auto-segment features delivered
 
 ## v1.1 Progress
 
@@ -35,7 +35,7 @@ Progress: [################] 97% (v1.0: 4/4 phases, v1.1: 1.75/2 phases)
 - Plan 01: Auto-Translate Feature - COMPLETE (8 min)
 - Requirements delivered: TRANS-01, TRANS-02, TRANS-03, TRANS-04
 
-### Phase 6: Auto-Segment (IN PROGRESS)
+### Phase 6: Auto-Segment (COMPLETE)
 - Plan 01: Core VAD Infrastructure - COMPLETE (6 min)
   - VADService with FluidAudio SileroVAD
   - CircularAudioBuffer (60s, thread-safe)
@@ -50,7 +50,7 @@ Progress: [################] 97% (v1.0: 4/4 phases, v1.1: 1.75/2 phases)
   - Silence threshold slider (1-5s configurable)
   - StatusIndicatorState for continuous recording and segment detection
   - StatusIndicatorPanel visual feedback
-- Plan 04: Polish - PENDING
+- Requirements delivered: SEG-01, SEG-02, SEG-03, SEG-04, SEG-05, SEG-06, SEG-07
 
 ## Performance Metrics
 
@@ -74,14 +74,13 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - SwiftData migration via default values (no explicit migration needed)
 
 **v1.1 decisions (Phase 6):**
-- FluidAudio SileroVAD uses 4096 samples (256ms), not 512 samples per research
+- FluidAudio SileroVAD uses 4096 samples (256ms) chunks
 - VADService is actor with async initialization (matches FluidAudio VadManager pattern)
 - swift-async-queue uses Task(on: queue) pattern for FIFO ordering
-- Silence duration configurable 0.5-5.0s, default 2.0s
+- Silence duration configurable 1.0-5.0s with 0.5s step, default 2.0s
 - VAD processing via Task.detached to not block audio thread
 - 0.5s buffer overlap between segments for context preservation
 - Mode routing in startRecording() based on isContinuousMode
-- Silence threshold range 1.0-5.0s with 0.5s step increments
 - Segment detection flash uses 0.5s auto-dismiss delay
 - Continuous recording state carries pendingSegments as associated value
 
@@ -91,18 +90,17 @@ None.
 
 ### Blockers/Concerns
 
-- [RESOLVED]: FluidAudio API complexity noted in research - actual API is cleaner than expected
-- [RESOLVED]: macOS minimum stays at **14.0+** (FluidAudio compatible)
+All resolved.
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 06-03-PLAN.md
+Stopped at: Completed v1.1 milestone
 Resume file: None
 
 ## Next Steps
 
-Run `/gsd:execute-phase 6` to continue with Plan 04 (Polish).
+Run `/gsd:audit-milestone` to verify cross-phase integration and E2E flows before archiving.
 
 ---
-*Updated: 2026-01-18 after Phase 6 Plan 03 completion*
+*Updated: 2026-01-18 after Phase 6 completion - v1.1 milestone complete*
