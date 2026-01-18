@@ -60,9 +60,9 @@ result: pass
 
 ## Summary
 
-total: 10
+total: 15
 passed: 8
-issues: 2
+issues: 7
 pending: 0
 skipped: 0
 
@@ -88,6 +88,90 @@ skipped: 0
   missing: []
   debug_session: ""
 
+## Additional Bugs (Ad-hoc Testing)
+
+### 11. Model Download Not Blocked
+expected: Pressing hotkey during model download should block/wait or show appropriate feedback
+result: issue
+reported: "khi đang download model, nhấn phím tắt để transcript thì ko block downloading"
+severity: major
+
+### 12. No Pre-Download Model in Settings
+expected: Settings should have option to pre-download models, not only trigger on first transcription
+result: issue
+reported: "ko có chức năng down sẵn model trong setting, chỉ trigger download khi nhấn transcript lần đầu"
+severity: minor
+
+### 13. Status Popup Layout Broken
+expected: Status indicator popup should display text properly centered
+result: issue
+reported: "UI popup khi download xong mà transcript thì popup hiển thị lệch - chữ Recording bị xén ở trên, khoảng trống ở dưới"
+severity: minor
+
+### 14. Text Segments No Space Separator
+expected: Auto-segment text insertions should have space between segments
+result: issue
+reported: "chữ vẫn bị dính ko có khoảng trắng - 'Xin chàoHôm nay là Chủ nhật'"
+severity: major
+
+### 15. Mode Switch Doesn't Reset Auto-Segment
+expected: Switching to Hold-to-Talk should disable auto-segment mode completely
+result: issue
+reported: "sau khi chuyển về lại chế độ hold to talk vẫn bị kẹt ở chế độ toggle - khả năng cao do ko chuyển enable auto segment về off"
+severity: major
+
+## Gaps (Continued)
+
+- truth: "Pressing hotkey during model download should block or show feedback"
+  status: failed
+  reason: "User reported: khi đang download model, nhấn phím tắt để transcript thì ko block downloading"
+  severity: major
+  test: 11
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Settings should allow pre-downloading models"
+  status: failed
+  reason: "User reported: ko có chức năng down sẵn model trong setting"
+  severity: minor
+  test: 12
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Status indicator popup should display text properly"
+  status: failed
+  reason: "User reported: popup hiển thị lệch - chữ Recording bị xén ở trên"
+  severity: minor
+  test: 13
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Auto-segment insertions should have space separator"
+  status: failed
+  reason: "User reported: chữ vẫn bị dính - 'Xin chàoHôm nay là Chủ nhật'"
+  severity: major
+  test: 14
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
+- truth: "Switching to Hold-to-Talk should disable auto-segment"
+  status: failed
+  reason: "User reported: sau khi chuyển về hold to talk vẫn bị kẹt ở chế độ toggle"
+  severity: major
+  test: 15
+  root_cause: ""
+  artifacts: []
+  missing: []
+  debug_session: ""
+
 ## Enhancement Notes
 
-- Previous feedback on Test 3: segments dính chữ - cần thêm space/separator giữa các đoạn (future enhancement for v1.2)
+- Previous feedback on Test 3: segments dính chữ - cần thêm space/separator giữa các đoạn (now logged as Bug #14)
