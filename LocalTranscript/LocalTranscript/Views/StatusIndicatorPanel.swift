@@ -95,6 +95,12 @@ class StatusIndicatorPanel: NSPanel {
 
         case .languageChanged(let mode):
             configureLanguageChangedState(mode: mode)
+
+        case .continuousRecording(let pendingSegments):
+            configureContinuousRecordingState(pendingSegments: pendingSegments)
+
+        case .segmentDetected:
+            configureSegmentDetectedState()
         }
 
         // Schedule auto-dismiss if needed
@@ -196,6 +202,45 @@ class StatusIndicatorPanel: NSPanel {
         iconView.frame.origin.y = 8
 
         resizePanel(width: Self.minWidth, height: Self.baseHeight)
+    }
+
+    private func configureContinuousRecordingState(pendingSegments: Int) {
+        // Mic icon with continuous recording indicator
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        let image = NSImage(systemSymbolName: "mic.circle.fill", accessibilityDescription: "Continuous Recording")
+        iconView.image = image?.withSymbolConfiguration(config)
+        iconView.contentTintColor = .systemBlue
+
+        if pendingSegments > 0 {
+            textLabel.stringValue = "Recording... (\(pendingSegments) pending)"
+        } else {
+            textLabel.stringValue = "Recording..."
+        }
+        progressBar.isHidden = true
+
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
+        let width = pendingSegments > 0 ? Self.maxWidth : Self.minWidth + 10
+        resizePanel(width: width, height: Self.baseHeight)
+    }
+
+    private func configureSegmentDetectedState() {
+        // Checkmark icon for segment detection
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        let image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Segment Detected")
+        iconView.image = image?.withSymbolConfiguration(config)
+        iconView.contentTintColor = .systemGreen
+
+        textLabel.stringValue = "Segment detected"
+        progressBar.isHidden = true
+
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
+        resizePanel(width: Self.minWidth + 20, height: Self.baseHeight)
     }
 
     // MARK: - Layout Helpers
