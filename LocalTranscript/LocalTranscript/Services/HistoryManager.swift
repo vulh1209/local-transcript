@@ -30,9 +30,9 @@ class HistoryManager {
 
     var container: ModelContainer? { modelContainer }
 
-    func save(text: String, languageMode: String, duration: TimeInterval) {
+    func save(text: String, languageMode: String, duration: TimeInterval, wasTranslated: Bool = false) {
         guard let context = modelContext else { return }
-        let record = TranscriptionRecord(text: text, languageMode: languageMode, duration: duration)
+        let record = TranscriptionRecord(text: text, languageMode: languageMode, duration: duration, wasTranslated: wasTranslated)
         context.insert(record)
         try? context.save()
 

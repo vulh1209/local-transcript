@@ -147,8 +147,13 @@ class TranscriptionService {
             if let historyManager = historyManager, let startTime = recordingStartTime {
                 let duration = Date().timeIntervalSince(startTime)
                 let mode = LanguageMode(rawValue: languageMode) ?? .auto
-                historyManager.save(text: text, languageMode: mode.rawValue, duration: duration)
-                logger.info("Saved to history (duration: \(duration)s)")
+                historyManager.save(
+                    text: text,
+                    languageMode: mode.rawValue,
+                    duration: duration,
+                    wasTranslated: isTranslateEnabled
+                )
+                logger.info("Saved to history (duration: \(duration)s, translated: \(self.isTranslateEnabled))")
             }
 
             // Hide status panel on success

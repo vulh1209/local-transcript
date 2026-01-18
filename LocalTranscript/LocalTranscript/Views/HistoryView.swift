@@ -63,6 +63,15 @@ struct HistoryRow: View {
                     Text("-")
                     Text(String(format: "%.1fs", record.duration))
                 }
+                if record.wasTranslated {
+                    Text("EN")
+                        .font(.caption2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(Color.blue)
+                        .clipShape(Capsule())
+                }
             }
             .font(.caption)
             .foregroundStyle(.secondary)
