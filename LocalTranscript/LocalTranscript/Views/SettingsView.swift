@@ -6,6 +6,7 @@ struct SettingsView: View {
     @State private var micStatus: PermissionManager.MicrophoneStatus = .notDetermined
     @State private var accessibilityGranted = false
     @AppStorage("languageMode") private var languageMode = LanguageMode.auto.rawValue
+    @AppStorage("translateMode") private var translateMode = false
     @State private var selectedTab = 0
 
     var body: some View {
@@ -65,6 +66,14 @@ struct SettingsView: View {
                 KeyboardShortcuts.Recorder("Cycle Language:", name: .cycleLanguage)
 
                 Text("Auto-detect or force specific language. Cycle with hotkey.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Translation") {
+                Toggle("Translate to English", isOn: $translateMode)
+
+                Text("When enabled, Vietnamese speech will be translated to English text. Works offline using Whisper's built-in translation.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
