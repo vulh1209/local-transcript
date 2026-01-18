@@ -28,9 +28,12 @@ Noi tieng Viet, ra text chinh xac, khong can internet.
 
 **v1.1 — Smart Dictation**
 
-- [ ] Custom vocabulary với phonetic hints — "iu-ai" → "UI", "cờ-lốt" → "Claude"
 - [ ] Auto-translate to English — toggle trong settings, nói Việt ra text English
 - [ ] Enhanced toggle mode với auto-segment — tự insert khi pause, không đợi manual stop
+
+**v1.2 — Custom Vocabulary** (planned)
+
+- [ ] Custom vocabulary với phonetic hints — "iu-ai" → "UI", "cờ-lốt" → "Claude"
 - [ ] Better English detection — improve transcription của English words trong Vietnamese speech
 
 ### Out of Scope
