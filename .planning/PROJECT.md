@@ -2,66 +2,77 @@
 
 ## What This Is
 
-macOS menu bar app cho phép người dùng nói tiếng Việt và tự động chuyển thành text tại vị trí con trỏ đang focus. Chạy hoàn toàn offline với local speech recognition model, tối ưu cho Apple Silicon. Thiết kế cho developer muốn "vibe code" — nói prompt cho AI hoặc viết documentation mà không cần gõ phím.
+macOS menu bar app for Vietnamese speech-to-text dictation. Hold a hotkey, speak in Vietnamese (or English), and text appears at your cursor. Runs 100% offline with WhisperKit on Apple Silicon. Designed for developers who want to "vibe code" — dictate prompts to AI or write documentation without typing.
 
 ## Core Value
 
-Nói tiếng Việt, ra text chính xác, không cần internet.
+Noi tieng Viet, ra text chinh xac, khong can internet.
 
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Nhấn hotkey bắt đầu ghi âm, nói tiếng Việt, thả ra có text — v1.0
+- ✓ Hỗ trợ 2 mode: hold-to-talk và toggle on/off — v1.0
+- ✓ Text được insert vào ô đang focus (bất kỳ app nào) — v1.0
+- ✓ Chạy offline với local model (không cần internet) — v1.0
+- ✓ Menu bar app với icon trạng thái — v1.0
+- ✓ Floating indicator khi đang recording — v1.0
+- ✓ Cài đặt hotkey tuỳ chỉnh — v1.0
+- ✓ Độ chính xác cao cho tiếng Việt — v1.0 (Whisper multilingual)
+- ✓ Model size selection (tiny/base/small/medium/large) — v1.0
+- ✓ Transcription history with copy/delete — v1.0
+- ✓ Language mode switching (Auto/Vietnamese/English) — v1.0
 
 ### Active
 
-- [ ] Nhấn hotkey bắt đầu ghi âm, nói tiếng Việt, thả ra có text
-- [ ] Hỗ trợ 2 mode: hold-to-talk và toggle on/off
-- [ ] Text được insert vào ô đang focus (bất kỳ app nào)
-- [ ] Chạy offline với local model (không cần internet)
-- [ ] Menu bar app với icon trạng thái
-- [ ] Floating indicator khi đang recording
-- [ ] Cài đặt hotkey tuỳ chỉnh
-- [ ] Độ chính xác cao cho tiếng Việt
+(No active requirements — ready for v1.1 planning)
 
 ### Out of Scope
 
 - Real-time streaming display (từng từ hiện ra khi nói) — ưu tiên accuracy, chờ xong mới hiển thị
-- Dịch tự động sang tiếng Anh — phase sau
+- Dịch tự động sang tiếng Anh — v2 consideration
 - Mobile app — macOS only
 - Windows/Linux — macOS only
 - Cloud-based STT — phải offline
 
 ## Context
 
-**Use case chính:** Vibe coding — developer nói tiếng Việt để:
-1. Chat với AI (Claude, Cursor) bằng prompt tiếng Việt
-2. Viết comments, documentation trong code
+**Shipped v1.0:** 2026-01-18
 
-**Tại sao offline:** Không muốn phụ thuộc internet, lo ngại privacy, muốn response nhanh không có network latency.
+**Current state:** 1,827 LOC Swift, macOS 14+, Apple Silicon optimized.
 
-**Hardware:** Apple Silicon Mac (M1/M2/M3/M4) — có thể tận dụng Metal acceleration cho inference nhanh.
+**Tech stack:**
+- SwiftUI + MenuBarExtra
+- WhisperKit (CoreML Whisper models)
+- KeyboardShortcuts (global hotkeys)
+- SwiftData (history persistence)
+- Accessibility API (text insertion)
+
+**Use case:** Developer dictation — speak Vietnamese to AI chat (Claude, Cursor) or write documentation.
 
 ## Constraints
 
 - **Platform**: macOS only (Apple Silicon optimized)
 - **Connectivity**: Must work 100% offline
-- **Cost**: Free/open-source model only
-- **Language**: Vietnamese speech recognition (primary)
-- **Privacy**: Audio không được gửi ra ngoài
+- **Cost**: Free/open-source model only (WhisperKit/Whisper)
+- **Language**: Vietnamese speech recognition (primary), English (secondary)
+- **Privacy**: Audio never leaves device
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Ưu tiên accuracy hơn real-time | User muốn text chuẩn, chờ 1-2s OK | — Pending |
-| Hỗ trợ cả hold-to-talk và toggle | Linh hoạt cho nhiều tình huống | — Pending |
-| Menu bar + floating indicator | Minimal UI, không chiếm desktop space | ✅ Implemented (Phase 2) |
-| **WhisperKit thay SwiftWhisper** | CoreML optimization, auto model download, simpler API | ✅ Implemented (Phase 2) |
-| **whisper-small model** | Good balance speed/accuracy (~250MB), Vietnamese support | ✅ Implemented (Phase 2) |
-| **NSSound thay AudioServicesPlaySystemSound** | iOS sound IDs không hoạt động trên macOS | ✅ Implemented (Phase 2) |
-| **Pure AppKit FloatingIndicatorPanel** | SwiftUI NSHostingView gây constraint crashes | ✅ Implemented (Phase 2) |
+| Non-sandboxed distribution | Accessibility API, CGEventTap require it | ✓ Good |
+| WhisperKit over SwiftWhisper | CoreML optimization, auto model download, simpler API | ✓ Good |
+| Whisper multilingual (not PhoWhisper) | Supports both Vietnamese + English, no hallucination | ✓ Good |
+| NSSound over AudioServicesPlaySystemSound | iOS sound IDs don't work on macOS | ✓ Good |
+| Pure AppKit FloatingIndicatorPanel | SwiftUI NSHostingView caused constraint crashes | ✓ Good |
+| Option+Space default hotkey | Non-conflicting, easy to hold for hold-to-talk | ✓ Good |
+| Dual text insertion (AX + clipboard) | Electron apps don't support AX, clipboard fallback works | ✓ Good |
+| SwiftData for history | Modern Apple framework, auto-sync with @Query | ✓ Good |
+| UserDefaults over @AppStorage | @AppStorage conflicts with @Observable macro | ✓ Good |
+| Computed Binding for async pickers | Avoids race condition with UserDefaults | ✓ Good |
 
 ---
-*Last updated: 2026-01-17 after Phase 2 WhisperKit migration*
+*Last updated: 2026-01-18 after v1.0 milestone*
