@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 6 of 6 (Auto-Segment)
-Plan: 2 of 4 complete
-Status: In progress - Plan 03 ready
-Last activity: 2026-01-18 - Completed 06-02-PLAN.md (AudioRecorder Integration)
+Plan: 3 of 4 complete
+Status: In progress - Plan 04 ready
+Last activity: 2026-01-18 - Completed 06-03-PLAN.md (UI Settings)
 
-Progress: [###############-] 94% (v1.0: 4/4 phases, v1.1: 1.5/2 phases)
+Progress: [################] 97% (v1.0: 4/4 phases, v1.1: 1.75/2 phases)
 
 ## v1.0 Summary
 
@@ -45,17 +45,22 @@ Progress: [###############-] 94% (v1.0: 4/4 phases, v1.1: 1.5/2 phases)
   - AudioRecorder VAD integration with silence callback
   - TranscriptionService continuous mode with queue
   - AppState VADService ownership
-- Plan 03: UI Settings - PENDING
+- Plan 03: UI Settings - COMPLETE (3 min)
+  - Auto-segment settings section with mode picker
+  - Silence threshold slider (1-5s configurable)
+  - StatusIndicatorState for continuous recording and segment detection
+  - StatusIndicatorPanel visual feedback
 - Plan 04: Polish - PENDING
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15 (v1.0: 12, v1.1: 3)
-- Average duration: ~25 min
+- Total plans completed: 16 (v1.0: 12, v1.1: 4)
+- Average duration: ~22 min
 - v1.1 Plan 05-01: 8 min
 - v1.1 Plan 06-01: 6 min
 - v1.1 Plan 06-02: 5 min
+- v1.1 Plan 06-03: 3 min
 
 ## Accumulated Context
 
@@ -76,6 +81,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - VAD processing via Task.detached to not block audio thread
 - 0.5s buffer overlap between segments for context preservation
 - Mode routing in startRecording() based on isContinuousMode
+- Silence threshold range 1.0-5.0s with 0.5s step increments
+- Segment detection flash uses 0.5s auto-dismiss delay
+- Continuous recording state carries pendingSegments as associated value
 
 ### Pending Todos
 
@@ -89,12 +97,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 06-02-PLAN.md
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
 
 ## Next Steps
 
-Run `/gsd:execute-phase 6` to continue with Plan 03 (UI Settings).
+Run `/gsd:execute-phase 6` to continue with Plan 04 (Polish).
 
 ---
-*Updated: 2026-01-18 after Phase 6 Plan 02 completion*
+*Updated: 2026-01-18 after Phase 6 Plan 03 completion*
