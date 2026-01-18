@@ -26,15 +26,20 @@ Noi tieng Viet, ra text chinh xac, khong can internet.
 
 ### Active
 
-(No active requirements — ready for v1.1 planning)
+**v1.1 — Smart Dictation**
+
+- [ ] Custom vocabulary với phonetic hints — "iu-ai" → "UI", "cờ-lốt" → "Claude"
+- [ ] Auto-translate to English — toggle trong settings, nói Việt ra text English
+- [ ] Enhanced toggle mode với auto-segment — tự insert khi pause, không đợi manual stop
+- [ ] Better English detection — improve transcription của English words trong Vietnamese speech
 
 ### Out of Scope
 
-- Real-time streaming display (từng từ hiện ra khi nói) — ưu tiên accuracy, chờ xong mới hiển thị
-- Dịch tự động sang tiếng Anh — v2 consideration
+- Real-time streaming display (từng từ hiện ra khi nói) — deferred to v2, complexity vs value
 - Mobile app — macOS only
 - Windows/Linux — macOS only
 - Cloud-based STT — phải offline
+- Voice commands ("xóa câu", "xuống dòng") — deferred, significant NLU complexity
 
 ## Context
 
@@ -75,4 +80,4 @@ Noi tieng Viet, ra text chinh xac, khong can internet.
 | Computed Binding for async pickers | Avoids race condition with UserDefaults | ✓ Good |
 
 ---
-*Last updated: 2026-01-18 after v1.0 milestone*
+*Last updated: 2026-01-18 after starting v1.1 milestone*
