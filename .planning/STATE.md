@@ -53,7 +53,7 @@ None.
 
 - [Research]: Apple Translation API requires SwiftUI context - needs bridge pattern
 - [Research]: WhisperKit `promptTokens` bug (#372) - verify status before using
-- [Research]: macOS minimum increases to 14.4 for Translation framework
+- [VERIFIED]: macOS minimum increases to **15.0+** for Translation framework (not 14.4)
 
 ## Session Continuity
 

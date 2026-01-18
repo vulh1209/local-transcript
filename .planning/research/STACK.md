@@ -507,10 +507,12 @@ import NaturalLanguage     // NLLanguageRecognizer for code-switching
 
 | Requirement | v1.0 | v1.1 |
 |-------------|------|------|
-| macOS | 14.0+ | **14.4+** (for Translation) |
+| macOS | 14.0+ | **15.0+** (for Translation) |
 | Xcode | 15.0+ | 15.0+ |
 | Swift | 5.9+ | 5.9+ |
 | WhisperKit | 0.13.0+ | **0.15.0+** (for EnergyVAD) |
+
+> **Note:** Research originally stated macOS 14.4+, but stack verification confirmed Translation framework requires macOS 15.0+ (Sequoia).
 
 ### New Services
 
