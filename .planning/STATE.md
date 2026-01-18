@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 6 of 6 (Auto-Segment)
-Plan: Ready to plan
-Status: Awaiting /gsd:discuss-phase 6
-Last activity: 2026-01-18 - Completed 05-01-PLAN.md (Auto-Translate)
+Plan: 1 of 4 complete
+Status: In progress - Plan 02 ready
+Last activity: 2026-01-18 - Completed 06-01-PLAN.md (Core VAD Infrastructure)
 
-Progress: [#############---] 85% (v1.0: 4/4 phases, v1.1: 1/2 phases)
+Progress: [##############--] 88% (v1.0: 4/4 phases, v1.1: 1.25/2 phases)
 
 ## v1.0 Summary
 
@@ -35,12 +35,22 @@ Progress: [#############---] 85% (v1.0: 4/4 phases, v1.1: 1/2 phases)
 - Plan 01: Auto-Translate Feature - COMPLETE (8 min)
 - Requirements delivered: TRANS-01, TRANS-02, TRANS-03, TRANS-04
 
+### Phase 6: Auto-Segment (IN PROGRESS)
+- Plan 01: Core VAD Infrastructure - COMPLETE (6 min)
+  - VADService with FluidAudio SileroVAD
+  - CircularAudioBuffer (60s, thread-safe)
+  - TranscriptionQueue (FIFO, depth tracking)
+- Plan 02: AudioRecorder Integration - READY
+- Plan 03: UI Settings - PENDING
+- Plan 04: Polish - PENDING
+
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13 (v1.0: 12, v1.1: 1)
-- Average duration: ~28 min
+- Total plans completed: 14 (v1.0: 12, v1.1: 2)
+- Average duration: ~26 min
 - v1.1 Plan 05-01: 8 min
+- v1.1 Plan 06-01: 6 min
 
 ## Accumulated Context
 
@@ -53,25 +63,30 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Store translateMode in UserDefaults like existing languageMode pattern
 - SwiftData migration via default values (no explicit migration needed)
 
+**v1.1 decisions (Phase 6):**
+- FluidAudio SileroVAD uses 4096 samples (256ms), not 512 samples per research
+- VADService is actor with async initialization (matches FluidAudio VadManager pattern)
+- swift-async-queue uses Task(on: queue) pattern for FIFO ordering
+- Silence duration configurable 0.5-5.0s, default 2.0s
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-- [Research]: Apple Translation API requires SwiftUI context - needs bridge pattern (not used in Phase 5)
-- [Research]: WhisperKit `promptTokens` bug (#372) - verify status before using
-- [RESOLVED]: macOS minimum stays at **14.0+** for Phase 5 (Translation framework not used)
+- [RESOLVED]: FluidAudio API complexity noted in research - actual API is cleaner than expected
+- [RESOLVED]: macOS minimum stays at **14.0+** (FluidAudio compatible)
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 05-01-PLAN.md
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
 
 ## Next Steps
 
-Run `/gsd:plan-phase 6` to plan Auto-Segment phase.
+Run `/gsd:execute-phase 6` to continue with Plan 02 (AudioRecorder Integration).
 
 ---
-*Updated: 2026-01-18 after Phase 5 Plan 01 completion*
+*Updated: 2026-01-18 after Phase 6 Plan 01 completion*
