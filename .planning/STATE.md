@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 6 of 6 (Auto-Segment)
-Plan: 1 of 4 complete
-Status: In progress - Plan 02 ready
-Last activity: 2026-01-18 - Completed 06-01-PLAN.md (Core VAD Infrastructure)
+Plan: 2 of 4 complete
+Status: In progress - Plan 03 ready
+Last activity: 2026-01-18 - Completed 06-02-PLAN.md (AudioRecorder Integration)
 
-Progress: [##############--] 88% (v1.0: 4/4 phases, v1.1: 1.25/2 phases)
+Progress: [###############-] 94% (v1.0: 4/4 phases, v1.1: 1.5/2 phases)
 
 ## v1.0 Summary
 
@@ -40,17 +40,22 @@ Progress: [##############--] 88% (v1.0: 4/4 phases, v1.1: 1.25/2 phases)
   - VADService with FluidAudio SileroVAD
   - CircularAudioBuffer (60s, thread-safe)
   - TranscriptionQueue (FIFO, depth tracking)
-- Plan 02: AudioRecorder Integration - READY
+- Plan 02: AudioRecorder Integration - COMPLETE (5 min)
+  - SegmentMode enum (manual/auto)
+  - AudioRecorder VAD integration with silence callback
+  - TranscriptionService continuous mode with queue
+  - AppState VADService ownership
 - Plan 03: UI Settings - PENDING
 - Plan 04: Polish - PENDING
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (v1.0: 12, v1.1: 2)
-- Average duration: ~26 min
+- Total plans completed: 15 (v1.0: 12, v1.1: 3)
+- Average duration: ~25 min
 - v1.1 Plan 05-01: 8 min
 - v1.1 Plan 06-01: 6 min
+- v1.1 Plan 06-02: 5 min
 
 ## Accumulated Context
 
@@ -68,6 +73,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - VADService is actor with async initialization (matches FluidAudio VadManager pattern)
 - swift-async-queue uses Task(on: queue) pattern for FIFO ordering
 - Silence duration configurable 0.5-5.0s, default 2.0s
+- VAD processing via Task.detached to not block audio thread
+- 0.5s buffer overlap between segments for context preservation
+- Mode routing in startRecording() based on isContinuousMode
 
 ### Pending Todos
 
@@ -81,12 +89,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 06-01-PLAN.md
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
 
 ## Next Steps
 
-Run `/gsd:execute-phase 6` to continue with Plan 02 (AudioRecorder Integration).
+Run `/gsd:execute-phase 6` to continue with Plan 03 (UI Settings).
 
 ---
-*Updated: 2026-01-18 after Phase 6 Plan 01 completion*
+*Updated: 2026-01-18 after Phase 6 Plan 02 completion*
