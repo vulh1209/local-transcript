@@ -64,6 +64,9 @@ class TranscriptionService {
     @ObservationIgnored private var recordingStartTime: Date?
     @ObservationIgnored private var segmentStartTime: Date?
 
+    /// RMS energy threshold for detecting silent audio (prevents Whisper hallucination)
+    private let rmsThreshold: Float = 0.01
+
     init(audioRecorder: AudioRecorder, modelManager: ModelManager, historyManager: HistoryManager? = nil) {
         self.audioRecorder = audioRecorder
         self.modelManager = modelManager
@@ -282,9 +285,16 @@ class TranscriptionService {
     private func handleSegment(_ samples: [Float]) {
         guard !samples.isEmpty else { return }
 
+        // Pre-transcription RMS energy check to reject silent audio (prevents Whisper hallucination)
+        let rms = sqrt(samples.map { $0 * $0 }.reduce(0, +) / Float(samples.count))
+        guard rms > rmsThreshold else {
+            logger.info("Segment rejected: RMS energy \(rms) below threshold \(self.rmsThreshold)")
+            return
+        }
+
         let sampleCount = samples.count
         let duration = Double(sampleCount) / 16000.0
-        logger.info("Handling segment: \(sampleCount) samples (\(duration)s)")
+        logger.info("Handling segment: \(sampleCount) samples (\(duration)s), RMS: \(rms)")
 
         // Increment pending count on main thread
         Task { @MainActor in
@@ -452,12 +462,33 @@ class TranscriptionService {
 
             print("[Transcribe] Got \(results.count) results")
 
-            // Join all transcription results
-            let text = results.compactMap { $0.text }
+            // Filter segments using WhisperKit metrics to reject hallucinations
+            let allSegments = results.flatMap { $0.segments }
+            let validSegments = allSegments.filter { segment in
+                // Reject if high probability of no speech (threshold: 0.7)
+                guard segment.noSpeechProb < 0.7 else {
+                    logger.info("Segment rejected: noSpeechProb \(segment.noSpeechProb) >= 0.7")
+                    return false
+                }
+                // Reject if very low confidence (threshold: -1.5)
+                guard segment.avgLogprob > -1.5 else {
+                    logger.info("Segment rejected: avgLogprob \(segment.avgLogprob) <= -1.5")
+                    return false
+                }
+                // Reject if high compression ratio indicating repetitive hallucination (threshold: 2.4)
+                guard segment.compressionRatio < 2.4 else {
+                    logger.info("Segment rejected: compressionRatio \(segment.compressionRatio) >= 2.4")
+                    return false
+                }
+                return true
+            }
+
+            // Build text from valid segments only
+            let text = validSegments.map { $0.text }
                 .joined(separator: " ")
                 .trimmingCharacters(in: CharacterSet.whitespaces)
 
-            print("[Transcribe] Text: \(text)")
+            print("[Transcribe] Filtered \(allSegments.count) -> \(validSegments.count) segments, text: \(text)")
             return text
         } catch {
             print("[Transcribe] Error: \(error)")
