@@ -302,8 +302,8 @@ class TranscriptionService {
                 }
 
                 // Process result on main thread
-                await MainActor.run { [weak self] in
-                    guard let self = self else { return }
+                let shouldInsertText = await MainActor.run { [weak self] () -> Bool in
+                    guard let self = self else { return false }
 
                     self.pendingSegments = max(0, self.pendingSegments - 1)
 
@@ -314,21 +314,24 @@ class TranscriptionService {
                         // Save to history
                         self.saveToHistory(text: text, startTime: self.segmentStartTime)
                         self.segmentStartTime = Date()
-
-                        // Insert text
-                        Task {
-                            await self.insertTextAtCursor(text)
-                        }
                     }
 
                     // Hide status if no more pending and not recording
                     if self.pendingSegments == 0 {
                         if case .continuousRecording = self.state {
-                            // Still recording, keep status visible
+                            // Return to continuous recording state (from .transcribing)
+                            self.showStatusPanel(.continuousRecording(pendingSegments: 0))
                         } else {
                             self.hideStatusPanel()
                         }
                     }
+
+                    return !text.isEmpty
+                }
+
+                // Insert text after main actor work completes (awaited, not fire-and-forget)
+                if shouldInsertText {
+                    await self.insertTextAtCursor(text)
                 }
             } catch {
                 await MainActor.run { [weak self] in
