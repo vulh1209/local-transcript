@@ -70,3 +70,6 @@ iOSInjectionProject/
 
 .claude/cache/
 .claude/tsc-cache/
+
+# Auto Claude data directory
+.auto-claude/

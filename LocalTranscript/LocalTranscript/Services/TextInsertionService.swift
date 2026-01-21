@@ -23,6 +23,44 @@ class TextInsertionService {
         }
     }
 
+    /// Get currently selected text from focused element via Accessibility API
+    /// Returns nil if no text is selected or accessibility permission not granted
+    func getSelectedText() -> String? {
+        // Check accessibility permission
+        guard AXIsProcessTrusted() else {
+            logger.debug("Cannot get selected text: Accessibility not granted")
+            return nil
+        }
+
+        let systemWide = AXUIElementCreateSystemWide()
+        var focusedElement: AnyObject?
+
+        guard AXUIElementCopyAttributeValue(
+            systemWide,
+            kAXFocusedUIElementAttribute as CFString,
+            &focusedElement
+        ) == .success,
+        let element = focusedElement as! AXUIElement? else {
+            logger.debug("No focused element found for text selection")
+            return nil
+        }
+
+        var selectedText: AnyObject?
+        guard AXUIElementCopyAttributeValue(
+            element,
+            kAXSelectedTextAttribute as CFString,
+            &selectedText
+        ) == .success,
+        let text = selectedText as? String,
+        !text.isEmpty else {
+            logger.debug("No text selected or selection is empty")
+            return nil
+        }
+
+        logger.info("Got selected text: '\(text.prefix(50))...' (\(text.count) chars)")
+        return text
+    }
+
     /// Insert text at cursor position in any app
     /// Uses clipboard + Cmd+V as primary method (most compatible)
     @MainActor

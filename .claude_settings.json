@@ -1,0 +1,39 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read(./**)",
+      "Write(./**)",
+      "Edit(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "Read(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/**)",
+      "Write(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/**)",
+      "Edit(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/**)",
+      "Glob(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/**)",
+      "Grep(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/**)",
+      "Read(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/.auto-claude/specs/001-translate/**)",
+      "Write(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/.auto-claude/specs/001-translate/**)",
+      "Edit(/Users/vule/SIPHER/local-transcript/.auto-claude/worktrees/tasks/001-translate/.auto-claude/specs/001-translate/**)",
+      "Read(/Users/vule/SIPHER/local-transcript/.auto-claude/**)",
+      "Write(/Users/vule/SIPHER/local-transcript/.auto-claude/**)",
+      "Edit(/Users/vule/SIPHER/local-transcript/.auto-claude/**)",
+      "Glob(/Users/vule/SIPHER/local-transcript/.auto-claude/**)",
+      "Grep(/Users/vule/SIPHER/local-transcript/.auto-claude/**)",
+      "Bash(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "mcp__context7__resolve-library-id(*)",
+      "mcp__context7__get-library-docs(*)",
+      "mcp__graphiti-memory__search_nodes(*)",
+      "mcp__graphiti-memory__search_facts(*)",
+      "mcp__graphiti-memory__add_episode(*)",
+      "mcp__graphiti-memory__get_episodes(*)",
+      "mcp__graphiti-memory__get_entity_edge(*)"
+    ]
+  }
+}
