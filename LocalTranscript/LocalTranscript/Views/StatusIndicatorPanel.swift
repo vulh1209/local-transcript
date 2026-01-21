@@ -250,9 +250,9 @@ class StatusIndicatorPanel: NSPanel {
     }
 
     private func configureTranslatingState() {
-        // Globe icon for translation in progress
+        // Globe with ellipsis icon for translation in progress
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-        let image = NSImage(systemSymbolName: "globe", accessibilityDescription: "Translating")
+        let image = NSImage(systemSymbolName: "globe.badge.ellipsis", accessibilityDescription: "Translating")
         iconView.image = image?.withSymbolConfiguration(config)
         iconView.contentTintColor = .systemBlue
 

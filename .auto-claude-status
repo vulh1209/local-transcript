@@ -3,23 +3,23 @@
   "spec": "001-translate",
   "state": "building",
   "subtasks": {
-    "completed": 2,
+    "completed": 3,
     "total": 17,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Text Selection Reading",
+    "current": "Status Panel UI",
     "id": null,
-    "total": 1
+    "total": 2
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 3,
+    "number": 4,
     "started_at": "2026-01-21T15:29:12.872692"
   },
-  "last_update": "2026-01-21T15:36:33.186359"
+  "last_update": "2026-01-21T15:38:54.161040"
 }
