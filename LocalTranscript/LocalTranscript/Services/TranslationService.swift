@@ -1,5 +1,6 @@
 import Foundation
 import Translation
+import NaturalLanguage
 import AppKit
 import os.log
 
@@ -160,12 +161,54 @@ class TranslationService {
     // MARK: - Translation (subtask-5-3)
 
     /// Performs bidirectional EN<->VI translation with auto-detection
-    /// Uses Apple Translation framework
+    /// Uses Apple Translation framework with NLLanguageRecognizer for language detection
     private func translate(text: String) async throws -> String {
-        // Placeholder: will be implemented in subtask-5-3
-        // For now, return the original text
-        logger.info("Translating text (placeholder)")
-        return text
+        logger.info("Starting translation for text (\(text.count) chars)")
+
+        // Detect source language using NLLanguageRecognizer
+        // This is more reliable than Translation API's auto-detect for short text
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(text)
+        let detectedLanguage = recognizer.dominantLanguage
+
+        logger.info("Detected language: \(String(describing: detectedLanguage))")
+
+        // Determine translation direction based on detected language
+        let sourceLanguage: Locale.Language
+        let targetLanguage: Locale.Language
+
+        if detectedLanguage == .vietnamese {
+            // Vietnamese → English
+            sourceLanguage = Locale.Language(identifier: "vi")
+            targetLanguage = Locale.Language(identifier: "en")
+            logger.info("Translation direction: VI → EN")
+        } else {
+            // English → Vietnamese (default for English or unknown languages)
+            // Per pitfalls research: treat unknown as English since most users will
+            // be translating English to Vietnamese
+            sourceLanguage = Locale.Language(identifier: "en")
+            targetLanguage = Locale.Language(identifier: "vi")
+            logger.info("Translation direction: EN → VI")
+        }
+
+        // Create translation configuration with explicit source and target
+        // Using explicit languages instead of nil for source to avoid short-text detection issues
+        let configuration = TranslationSession.Configuration(
+            source: sourceLanguage,
+            target: targetLanguage
+        )
+
+        do {
+            // Create TranslationSession and perform translation
+            let session = try await TranslationSession(configuration: configuration)
+            let response = try await session.translate(text)
+
+            logger.info("Translation completed: '\(response.targetText.prefix(50))...'")
+            return response.targetText
+        } catch {
+            logger.error("TranslationSession error: \(error.localizedDescription)")
+            throw TranslationError.translationFailed(error.localizedDescription)
+        }
     }
 
     // MARK: - Status Panel Management
