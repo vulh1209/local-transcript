@@ -6,6 +6,7 @@ import AppKit
 extension KeyboardShortcuts.Name {
     static let toggleRecording = Self("toggleRecording", default: .init(.space, modifiers: [.option]))
     static let cycleLanguage = Self("cycleLanguage", default: .init(.l, modifiers: [.option]))
+    static let translateSelection = Self("translateSelection", default: .init(.t, modifiers: [.option]))
 }
 
 enum RecordingMode: String, CaseIterable {
@@ -30,6 +31,7 @@ class HotkeyService {
     private var isRecording = false
     private var onStart: (() async throws -> Void)?
     private var onStop: (() async -> Void)?
+    private var onTranslate: (() async -> Void)?
     @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
 
     init() {
@@ -83,6 +85,15 @@ class HotkeyService {
         self.onStart = onStart
         self.onStop = onStop
         rebindHandlers()
+    }
+
+    func bindTranslation(onTranslate: @escaping () async -> Void) {
+        self.onTranslate = onTranslate
+        KeyboardShortcuts.onKeyUp(for: .translateSelection) { [weak self] in
+            Task { @MainActor in
+                await self?.onTranslate?()
+            }
+        }
     }
 
     private func rebindHandlers() {

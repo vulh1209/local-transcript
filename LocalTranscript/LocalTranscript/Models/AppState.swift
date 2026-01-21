@@ -40,6 +40,21 @@ class AppState {
         return service
     }
 
+    // TranslationService for EN<->VI translation (requires macOS 15.0+)
+    // Note: Cannot use lazy var with @Observable macro, so using @ObservationIgnored
+    @ObservationIgnored
+    private var _translationService: Any?
+
+    @available(macOS 15.0, *)
+    var translationService: TranslationService {
+        if let service = _translationService as? TranslationService {
+            return service
+        }
+        let service = TranslationService()
+        _translationService = service
+        return service
+    }
+
     // Derived from transcription service state
     var isRecording: Bool {
         transcriptionService.isRecording
@@ -66,5 +81,13 @@ class AppState {
                 await self.transcriptionService.stopRecording()
             }
         )
+
+        // Bind translation hotkey (requires macOS 15.0+)
+        if #available(macOS 15.0, *) {
+            hotkeyService.bindTranslation(onTranslate: { [weak self] in
+                guard let self else { return }
+                await self.translationService.translateSelection()
+            })
+        }
     }
 }

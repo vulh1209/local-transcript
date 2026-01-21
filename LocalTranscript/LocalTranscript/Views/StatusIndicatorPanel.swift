@@ -7,14 +7,18 @@ class StatusIndicatorPanel: NSPanel {
     private let iconView: NSImageView
     private let textLabel: NSTextField
     private let progressBar: NSProgressIndicator
+    private let closeButton: NSButton
+    private let translatedTextView: NSScrollView
+    private let translatedTextLabel: NSTextView
 
     private var autoDismissWorkItem: DispatchWorkItem?
 
     // Panel sizing
     private static let minWidth: CGFloat = 140
-    private static let maxWidth: CGFloat = 220
+    private static let maxWidth: CGFloat = 320
     private static let baseHeight: CGFloat = 36
     private static let progressHeight: CGFloat = 50
+    private static let translatedHeight: CGFloat = 120
 
     init() {
         let panelRect = NSRect(x: 0, y: 0, width: Self.minWidth, height: Self.baseHeight)
@@ -48,6 +52,37 @@ class StatusIndicatorPanel: NSPanel {
         progressBar.isHidden = true
         containerView.addSubview(progressBar)
 
+        // Create close button (hidden by default)
+        closeButton = NSButton(frame: NSRect(x: Self.maxWidth - 28, y: Self.translatedHeight - 28, width: 20, height: 20))
+        closeButton.bezelStyle = .circular
+        closeButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Close")
+        closeButton.imagePosition = .imageOnly
+        closeButton.isBordered = false
+        closeButton.contentTintColor = .secondaryLabelColor
+        closeButton.isHidden = true
+        containerView.addSubview(closeButton)
+
+        // Create translated text scroll view (hidden by default)
+        translatedTextView = NSScrollView(frame: NSRect(x: 12, y: 12, width: Self.maxWidth - 24, height: Self.translatedHeight - 44))
+        translatedTextView.hasVerticalScroller = true
+        translatedTextView.hasHorizontalScroller = false
+        translatedTextView.autohidesScrollers = true
+        translatedTextView.borderType = .noBorder
+        translatedTextView.drawsBackground = false
+        translatedTextView.isHidden = true
+
+        // Create text view for translated content
+        translatedTextLabel = NSTextView(frame: NSRect(x: 0, y: 0, width: Self.maxWidth - 24, height: Self.translatedHeight - 44))
+        translatedTextLabel.isEditable = false
+        translatedTextLabel.isSelectable = true
+        translatedTextLabel.drawsBackground = false
+        translatedTextLabel.font = NSFont.systemFont(ofSize: 13)
+        translatedTextLabel.textColor = NSColor.labelColor
+        translatedTextLabel.textContainerInset = NSSize(width: 0, height: 0)
+
+        translatedTextView.documentView = translatedTextLabel
+        containerView.addSubview(translatedTextView)
+
         super.init(
             contentRect: panelRect,
             styleMask: [.borderless, .nonactivatingPanel],
@@ -66,11 +101,19 @@ class StatusIndicatorPanel: NSPanel {
 
         contentView = containerView
 
+        // Set up close button action
+        closeButton.target = self
+        closeButton.action = #selector(closeButtonClicked)
+
         // Position at top-center of main screen
         positionAtTopCenter()
 
         // Default to recording state
         updateState(.recording)
+    }
+
+    @objc private func closeButtonClicked() {
+        close()
     }
 
     /// Updates the panel to display the specified state
@@ -101,6 +144,12 @@ class StatusIndicatorPanel: NSPanel {
 
         case .segmentDetected:
             configureSegmentDetectedState()
+
+        case .translating:
+            configureTranslatingState()
+
+        case .translated(let text):
+            configureTranslatedState(text: text)
         }
 
         // Schedule auto-dismiss if needed
@@ -116,6 +165,8 @@ class StatusIndicatorPanel: NSPanel {
     // MARK: - State Configurations
 
     private func configureRecordingState() {
+        hideTranslationUI()
+
         // Red circle icon
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: "Recording")
@@ -125,10 +176,16 @@ class StatusIndicatorPanel: NSPanel {
         textLabel.stringValue = "Recording"
         progressBar.isHidden = true
 
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
         resizePanel(width: Self.minWidth, height: Self.baseHeight)
     }
 
     private func configureTranscribingState() {
+        hideTranslationUI()
+
         // Waveform icon
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "waveform", accessibilityDescription: "Transcribing")
@@ -138,10 +195,16 @@ class StatusIndicatorPanel: NSPanel {
         textLabel.stringValue = "Transcribing..."
         progressBar.isHidden = true
 
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
         resizePanel(width: Self.minWidth + 10, height: Self.baseHeight)
     }
 
     private func configureDownloadingState(progress: Double) {
+        hideTranslationUI()
+
         // Download icon
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "arrow.down.circle.fill", accessibilityDescription: "Downloading")
@@ -168,6 +231,8 @@ class StatusIndicatorPanel: NSPanel {
     }
 
     private func configureErrorState(message: String) {
+        hideTranslationUI()
+
         // Error icon
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "exclamationmark.circle.fill", accessibilityDescription: "Error")
@@ -188,6 +253,8 @@ class StatusIndicatorPanel: NSPanel {
     }
 
     private func configureLanguageChangedState(mode: String) {
+        hideTranslationUI()
+
         // Globe icon
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "globe", accessibilityDescription: "Language")
@@ -205,6 +272,8 @@ class StatusIndicatorPanel: NSPanel {
     }
 
     private func configureContinuousRecordingState(pendingSegments: Int) {
+        hideTranslationUI()
+
         // Mic icon with continuous recording indicator
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "mic.circle.fill", accessibilityDescription: "Continuous Recording")
@@ -227,6 +296,8 @@ class StatusIndicatorPanel: NSPanel {
     }
 
     private func configureSegmentDetectedState() {
+        hideTranslationUI()
+
         // Checkmark icon for segment detection
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         let image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Segment Detected")
@@ -241,6 +312,58 @@ class StatusIndicatorPanel: NSPanel {
         iconView.frame.origin.y = 8
 
         resizePanel(width: Self.minWidth + 20, height: Self.baseHeight)
+    }
+
+    private func configureTranslatingState() {
+        hideTranslationUI()
+
+        // Globe with ellipsis icon for translation in progress
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        let image = NSImage(systemSymbolName: "globe.badge.ellipsis", accessibilityDescription: "Translating")
+        iconView.image = image?.withSymbolConfiguration(config)
+        iconView.contentTintColor = .systemBlue
+
+        textLabel.stringValue = "Translating..."
+        progressBar.isHidden = true
+
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
+        resizePanel(width: Self.minWidth + 10, height: Self.baseHeight)
+    }
+
+    private func configureTranslatedState(text: String) {
+        // Checkmark icon for translation completed
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        let image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Translated")
+        iconView.image = image?.withSymbolConfiguration(config)
+        iconView.contentTintColor = .systemGreen
+
+        textLabel.stringValue = "Translated (copied)"
+        progressBar.isHidden = true
+
+        // Position header elements at top
+        iconView.frame.origin.y = Self.translatedHeight - 28
+        textLabel.frame.origin.y = Self.translatedHeight - 28
+
+        // Show close button
+        closeButton.frame.origin = NSPoint(x: Self.maxWidth - 28, y: Self.translatedHeight - 28)
+        closeButton.isHidden = false
+
+        // Show translated text in scrollable text view
+        translatedTextLabel.string = text
+        translatedTextView.frame = NSRect(x: 12, y: 12, width: Self.maxWidth - 24, height: Self.translatedHeight - 48)
+        translatedTextLabel.frame.size.width = Self.maxWidth - 24
+        translatedTextView.isHidden = false
+
+        resizePanel(width: Self.maxWidth, height: Self.translatedHeight)
+    }
+
+    /// Hide translation-specific UI elements
+    private func hideTranslationUI() {
+        closeButton.isHidden = true
+        translatedTextView.isHidden = true
     }
 
     // MARK: - Layout Helpers

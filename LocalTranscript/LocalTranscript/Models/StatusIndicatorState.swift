@@ -16,15 +16,19 @@ enum StatusIndicatorState: Equatable {
     case continuousRecording(pendingSegments: Int)
     /// Brief flash when segment boundary detected (before transcription starts)
     case segmentDetected
+    /// Processing text translation
+    case translating
+    /// Translation completed successfully (shows translated text preview)
+    case translated(String)
 
     /// Duration to auto-hide this state (nil = don't auto-hide)
     var autoDismissDelay: TimeInterval? {
         switch self {
-        case .recording, .transcribing, .downloading, .continuousRecording:
+        case .recording, .transcribing, .downloading, .continuousRecording, .translating:
             return nil  // Stay visible until state changes
         case .error:
             return 3.0  // Show error for 3 seconds
-        case .languageChanged:
+        case .languageChanged, .translated:
             return 1.5  // Brief confirmation
         case .segmentDetected:
             return 0.5  // Very brief flash (500ms)
