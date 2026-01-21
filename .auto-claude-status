@@ -3,13 +3,13 @@
   "spec": "001-translate",
   "state": "building",
   "subtasks": {
-    "completed": 3,
+    "completed": 5,
     "total": 17,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Status Panel UI",
+    "current": "Hotkey Registration",
     "id": null,
     "total": 2
   },
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 4,
+    "number": 6,
     "started_at": "2026-01-21T15:29:12.872692"
   },
-  "last_update": "2026-01-21T15:38:54.161040"
+  "last_update": "2026-01-21T15:42:31.671438"
 }

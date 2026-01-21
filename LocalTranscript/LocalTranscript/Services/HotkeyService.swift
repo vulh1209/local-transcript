@@ -6,6 +6,7 @@ import AppKit
 extension KeyboardShortcuts.Name {
     static let toggleRecording = Self("toggleRecording", default: .init(.space, modifiers: [.option]))
     static let cycleLanguage = Self("cycleLanguage", default: .init(.l, modifiers: [.option]))
+    static let translateSelection = Self("translateSelection", default: .init(.t, modifiers: [.option]))
 }
 
 enum RecordingMode: String, CaseIterable {
