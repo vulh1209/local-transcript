@@ -3,41 +3,85 @@ import Translation
 import NaturalLanguage
 import AppKit
 import SwiftUI
+import Combine
 import os.log
 
 private let logger = Logger(subsystem: "com.voicetype.localtranscript", category: "TranslationService")
 
-/// Helper view that uses translationTask to perform translations
-/// The Translation framework requires SwiftUI to obtain a TranslationSession
+/// Coordinator class that manages translation requests and results
+/// This class is kept alive by the TranslationService to avoid lifecycle issues
 @available(macOS 15.0, *)
-private struct TranslationHelper: View {
-    let text: String
-    let sourceLanguage: Locale.Language
-    let targetLanguage: Locale.Language
-    let onComplete: (Result<String, Error>) -> Void
+private class TranslationCoordinator: ObservableObject {
+    @Published var pendingRequest: TranslationRequest?
+    var continuation: CheckedContinuation<String, Error>?
 
+    struct TranslationRequest: Identifiable {
+        let id: UUID
+        let text: String
+        let sourceLanguage: Locale.Language
+        let targetLanguage: Locale.Language
+    }
+
+    func completeWithSuccess(_ text: String) {
+        continuation?.resume(returning: text)
+        continuation = nil
+    }
+
+    func completeWithError(_ error: Error) {
+        continuation?.resume(throwing: error)
+        continuation = nil
+    }
+}
+
+/// Persistent view that handles translation using translationTask
+@available(macOS 15.0, *)
+private struct PersistentTranslationView: View {
+    @ObservedObject var coordinator: TranslationCoordinator
     @State private var configuration: TranslationSession.Configuration?
+    @State private var currentRequestId: UUID?
 
     var body: some View {
         Color.clear
             .frame(width: 1, height: 1)
             .translationTask(configuration) { session in
+                guard let request = coordinator.pendingRequest else {
+                    logger.debug("translationTask called but no pending request")
+                    return
+                }
+                logger.info("translationTask executing for request \(request.id)")
                 do {
-                    let response = try await session.translate(text)
+                    let response = try await session.translate(request.text)
+                    logger.info("translationTask got response: \(response.targetText.prefix(30))...")
                     await MainActor.run {
-                        onComplete(.success(response.targetText))
+                        coordinator.completeWithSuccess(response.targetText)
                     }
                 } catch {
+                    logger.error("translationTask error: \(error.localizedDescription)")
                     await MainActor.run {
-                        onComplete(.failure(error))
+                        coordinator.completeWithError(error)
                     }
                 }
             }
-            .onAppear {
-                // Trigger translation by setting the configuration
+            .onReceive(coordinator.$pendingRequest) { newRequest in
+                guard let request = newRequest else {
+                    return
+                }
+
+                // Only update if this is a new request
+                guard request.id != currentRequestId else {
+                    logger.debug("Ignoring duplicate request \(request.id)")
+                    return
+                }
+
+                logger.info("onReceive: new request \(request.id)")
+                currentRequestId = request.id
+
+                // Always create a new configuration with correct source/target languages
+                // (invalidate() reuses old config which may have wrong languages)
+                logger.info("Creating configuration: \(request.sourceLanguage.languageCode?.identifier ?? "?") → \(request.targetLanguage.languageCode?.identifier ?? "?")")
                 configuration = TranslationSession.Configuration(
-                    source: sourceLanguage,
-                    target: targetLanguage
+                    source: request.sourceLanguage,
+                    target: request.targetLanguage
                 )
             }
     }
@@ -59,6 +103,7 @@ class TranslationService {
         case languagePacksNotInstalled
         case translationFailed(String)
         case textTooLong
+        case timeout
 
         var errorDescription: String? {
             switch self {
@@ -72,6 +117,8 @@ class TranslationService {
                 return "Translation failed: \(message)"
             case .textTooLong:
                 return "Selected text is too long"
+            case .timeout:
+                return "Translation timed out"
             }
         }
     }
@@ -85,8 +132,40 @@ class TranslationService {
     private let textInsertionService: TextInsertionService
     @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
 
+    // Persistent translation infrastructure - created once and reused
+    @ObservationIgnored private var translationCoordinator: TranslationCoordinator?
+    @ObservationIgnored private var translationWindow: NSWindow?
+
     init(textInsertionService: TextInsertionService = TextInsertionService()) {
         self.textInsertionService = textInsertionService
+    }
+
+    /// Ensures the persistent translation window is set up
+    @MainActor
+    private func ensureTranslationWindow() {
+        guard translationWindow == nil else { return }
+
+        let coordinator = TranslationCoordinator()
+        translationCoordinator = coordinator
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
+            styleMask: [],
+            backing: .buffered,
+            defer: false
+        )
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.level = .floating
+        window.ignoresMouseEvents = true
+        window.isReleasedWhenClosed = false  // Important: don't release when closed
+
+        let hostingView = NSHostingView(rootView: PersistentTranslationView(coordinator: coordinator))
+        window.contentView = hostingView
+        window.orderFront(nil)
+
+        translationWindow = window
+        logger.info("Persistent translation window created")
     }
 
     var isTranslating: Bool {
@@ -111,8 +190,13 @@ class TranslationService {
         // Reset from previous completed/error states
         state = .idle
 
-        // Read selected text via Accessibility API
-        guard let selectedText = textInsertionService.getSelectedText() else {
+        // Check if focused element is editable BEFORE getting text
+        // (clipboard operations may change focus)
+        let isEditable = textInsertionService.isFocusedElementEditable()
+        logger.info("Focused element editable (before copy): \(isEditable)")
+
+        // Read selected text via clipboard (Cmd+C) - works with VSCode, Chrome, etc.
+        guard let selectedText = await textInsertionService.getSelectedTextViaClipboard() else {
             logger.warning("No text selected")
             showStatusPanel(.error(message: TranslationError.noTextSelected.localizedDescription))
             state = .error(.noTextSelected)
@@ -144,12 +228,23 @@ class TranslationService {
             lastTranslation = translatedText
             state = .completed(translatedText)
 
-            // Show success indicator
-            showStatusPanel(.translated(translatedText))
-
-            // Insert translated text at cursor (replaces selection)
-            try await textInsertionService.insertText(translatedText)
-            logger.info("Translated text inserted successfully")
+            // Use the editability state captured BEFORE clipboard operations
+            // (checking again here would fail because focus may have changed)
+            if isEditable {
+                // Editable field: auto-paste the translated text
+                try await textInsertionService.insertText(translatedText)
+                logger.info("Translated text inserted into editable field")
+                // Show brief success indicator
+                showStatusPanel(.translated(translatedText), duration: 3.0)
+            } else {
+                // Non-editable: copy to clipboard and show popup for 15 seconds
+                let pasteboard = NSPasteboard.general
+                pasteboard.clearContents()
+                pasteboard.setString(translatedText, forType: .string)
+                logger.info("Translated text copied to clipboard (non-editable context)")
+                // Show translated text in popup for 15 seconds so user can read/copy
+                showStatusPanel(.translated(translatedText), duration: 15.0)
+            }
 
         } catch let error as TranslationError {
             logger.error("Translation error: \(error.localizedDescription)")
@@ -204,6 +299,13 @@ class TranslationService {
     private func translate(text: String) async throws -> String {
         logger.info("Starting translation for text (\(text.count) chars)")
 
+        // Ensure persistent translation window exists
+        ensureTranslationWindow()
+
+        guard let coordinator = translationCoordinator else {
+            throw TranslationError.translationFailed("Translation coordinator not initialized")
+        }
+
         // Detect source language using NLLanguageRecognizer
         // This is more reliable than Translation API's auto-detect for short text
         let recognizer = NLLanguageRecognizer()
@@ -230,54 +332,40 @@ class TranslationService {
             logger.info("Translation direction: EN → VI")
         }
 
-        // Use a continuation to bridge between SwiftUI's translationTask and our async method
+        // Create translation request
+        let requestId = UUID()
+        let request = TranslationCoordinator.TranslationRequest(
+            id: requestId,
+            text: text,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage
+        )
+
+        // Use continuation to wait for result
         return try await withCheckedThrowingContinuation { continuation in
-            // Create a temporary window to host the translation helper view
-            let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
-                styleMask: [],
-                backing: .buffered,
-                defer: false
-            )
-            window.isOpaque = false
-            window.backgroundColor = .clear
-            window.level = .floating
-            window.ignoresMouseEvents = true
-
-            var hasCompleted = false
-
-            let helperView = TranslationHelper(
-                text: text,
-                sourceLanguage: sourceLanguage,
-                targetLanguage: targetLanguage
-            ) { result in
-                guard !hasCompleted else { return }
-                hasCompleted = true
-                window.close()
-                switch result {
-                case .success(let translatedText):
-                    logger.info("Translation completed: '\(translatedText.prefix(50))...'")
-                    continuation.resume(returning: translatedText)
-                case .failure(let error):
-                    logger.error("TranslationSession error: \(error.localizedDescription)")
-                    continuation.resume(throwing: TranslationError.translationFailed(error.localizedDescription))
-                }
-            }
-
-            window.contentView = NSHostingView(rootView: helperView)
-            window.orderFront(nil)
+            coordinator.continuation = continuation
+            coordinator.pendingRequest = request
+            logger.info("Request \(requestId) submitted, waiting for result...")
         }
     }
 
     // MARK: - Status Panel Management
 
     @MainActor
-    private func showStatusPanel(_ state: StatusIndicatorState) {
+    private func showStatusPanel(_ state: StatusIndicatorState, duration: TimeInterval? = nil) {
         if statusPanel == nil {
             statusPanel = StatusIndicatorPanel()
         }
         statusPanel?.updateState(state)
         statusPanel?.orderFront(nil)
+
+        // Auto-hide after duration if specified
+        if let duration = duration {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(duration))
+                self.hideStatusPanel()
+            }
+        }
     }
 
     @MainActor

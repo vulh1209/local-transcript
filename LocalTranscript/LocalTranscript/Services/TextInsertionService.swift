@@ -23,6 +23,58 @@ class TextInsertionService {
         }
     }
 
+    /// Get currently selected text using clipboard (Cmd+C)
+    /// Works with most apps including VSCode, Chrome, Terminal
+    /// Returns nil if no text is selected or copy fails
+    @MainActor
+    func getSelectedTextViaClipboard() async -> String? {
+        // Check accessibility permission (needed for simulating Cmd+C)
+        guard AXIsProcessTrusted() else {
+            logger.debug("Cannot get selected text: Accessibility not granted")
+            return nil
+        }
+
+        // Save current clipboard content and change count to restore later
+        let savedClipboard = pasteboard.string(forType: .string)
+        let initialChangeCount = pasteboard.changeCount
+
+        // Simulate Cmd+C to copy selection
+        simulateCopy()
+
+        // Poll for clipboard change with timeout
+        // Some apps (especially Electron apps) need more time to process copy
+        var copiedText: String?
+        let maxAttempts = 10
+        let pollInterval: UInt64 = 50_000_000 // 50ms in nanoseconds
+
+        for attempt in 1...maxAttempts {
+            try? await Task.sleep(nanoseconds: pollInterval)
+
+            // Check if clipboard changed
+            if pasteboard.changeCount != initialChangeCount {
+                copiedText = pasteboard.string(forType: .string)
+                logger.debug("Clipboard changed after \(attempt * 50)ms")
+                break
+            }
+        }
+
+        // Restore previous clipboard content if we got new text
+        if let saved = savedClipboard, copiedText != nil && copiedText != saved {
+            // Small delay before restoring
+            try? await Task.sleep(for: .milliseconds(50))
+            pasteboard.clearContents()
+            pasteboard.setString(saved, forType: .string)
+        }
+
+        guard let text = copiedText, !text.isEmpty else {
+            logger.debug("No text copied from selection (clipboard unchanged)")
+            return nil
+        }
+
+        logger.info("Got selected text via clipboard: '\(text.prefix(50))...' (\(text.count) chars)")
+        return text
+    }
+
     /// Get currently selected text from focused element via Accessibility API
     /// Returns nil if no text is selected or accessibility permission not granted
     func getSelectedText() -> String? {
@@ -59,6 +111,78 @@ class TextInsertionService {
 
         logger.info("Got selected text: '\(text.prefix(50))...' (\(text.count) chars)")
         return text
+    }
+
+    /// Check if the currently focused element is editable (can accept text input)
+    /// Uses multiple strategies: AXUIElement check, then fallback to app bundle ID heuristics
+    func isFocusedElementEditable() -> Bool {
+        guard AXIsProcessTrusted() else {
+            return false
+        }
+
+        // Strategy 1: Try direct AXUIElement focused element check
+        let systemWide = AXUIElementCreateSystemWide()
+        var focusedElement: AnyObject?
+
+        if AXUIElementCopyAttributeValue(
+            systemWide,
+            kAXFocusedUIElementAttribute as CFString,
+            &focusedElement
+        ) == .success,
+        let element = focusedElement as! AXUIElement? {
+            // Check if element supports setting selected text (indicates editability)
+            var settable: DarwinBoolean = false
+            if AXUIElementIsAttributeSettable(
+                element,
+                kAXSelectedTextAttribute as CFString,
+                &settable
+            ) == .success {
+                let isEditable = settable.boolValue
+                logger.debug("Focused element editable (AX check): \(isEditable)")
+                return isEditable
+            }
+        }
+
+        // Strategy 2: Fallback to app-based heuristics for Electron/web apps
+        // These apps often don't expose focused elements properly via AXUIElement
+        logger.debug("No focused element found, checking frontmost app")
+
+        guard let frontApp = NSWorkspace.shared.frontmostApplication,
+              let bundleId = frontApp.bundleIdentifier else {
+            logger.debug("Could not determine frontmost app")
+            return false
+        }
+
+        logger.debug("Frontmost app: \(bundleId)")
+
+        // Known code editors and text-focused apps where selection likely means editable context
+        let editableApps: Set<String> = [
+            "com.microsoft.VSCode",
+            "com.microsoft.VSCodeInsiders",
+            "com.todesktop.230313mzl4w4u92",  // Cursor
+            "com.sublimetext.4",
+            "com.sublimetext.3",
+            "com.jetbrains.intellij",
+            "com.jetbrains.WebStorm",
+            "com.jetbrains.pycharm",
+            "com.apple.dt.Xcode",
+            "com.apple.TextEdit",
+            "com.apple.Notes",
+            "com.googlecode.iterm2",
+            "com.apple.Terminal",
+            "io.alacritty",
+            "net.kovidgoyal.kitty",
+            "org.vim.MacVim",
+            "com.github.atom",  // Atom (legacy)
+            "abnerworks.Typora",
+            "md.obsidian",
+            "com.electron.logseq",
+            "notion.id",
+        ]
+
+        let isKnownEditor = editableApps.contains(bundleId)
+        logger.debug("App \(bundleId) is known editor: \(isKnownEditor)")
+        return isKnownEditor
     }
 
     /// Insert text at cursor position in any app
@@ -146,6 +270,25 @@ class TextInsertionService {
         // Virtual key code 9 = 'V' key
         let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: true)
         let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: false)
+
+        // Add Command modifier
+        keyDown?.flags = .maskCommand
+        keyUp?.flags = .maskCommand
+
+        // Post events to focused application
+        keyDown?.post(tap: .cgAnnotatedSessionEventTap)
+        keyUp?.post(tap: .cgAnnotatedSessionEventTap)
+    }
+
+    private func simulateCopy() {
+        guard let source = CGEventSource(stateID: .hidSystemState) else {
+            logger.error("Failed to create CGEventSource")
+            return
+        }
+
+        // Virtual key code 8 = 'C' key
+        let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 8, keyDown: true)
+        let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 8, keyDown: false)
 
         // Add Command modifier
         keyDown?.flags = .maskCommand
