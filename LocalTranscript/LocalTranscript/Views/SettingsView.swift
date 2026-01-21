@@ -25,200 +25,250 @@ struct SettingsView: View {
                 }
                 .tag(1)
         }
-        .frame(width: 500, height: 550)
+        .frame(width: 520, height: 620)
         .onAppear {
             refreshPermissions()
         }
     }
 
     private var generalTab: some View {
-        Form {
-            Section("General") {
-                @Bindable var launchManager = appState.launchManager
-                Toggle("Start at Login", isOn: $launchManager.launchAtLogin)
+        ScrollView {
+            VStack(spacing: GlassDesign.Spacing.md) {
+                // General Section
+                GlassSection(title: "General", icon: "gearshape.fill") {
+                    @Bindable var launchManager = appState.launchManager
+                    GlassToggle(
+                        "Start at Login",
+                        isOn: $launchManager.launchAtLogin
+                    )
                     .onAppear {
                         appState.launchManager.syncFromSystem()
                     }
-            }
+                }
 
-            Section("Hotkey") {
-                KeyboardShortcuts.Recorder("Recording Shortcut:", name: .toggleRecording)
+                // Hotkey Section
+                GlassSection(title: "Hotkey", icon: "keyboard.fill") {
+                    VStack(alignment: .leading, spacing: GlassDesign.Spacing.sm) {
+                        HStack {
+                            Text("Recording Shortcut")
+                                .font(.system(size: 13))
+                            Spacer()
+                            KeyboardShortcuts.Recorder(for: .toggleRecording)
+                        }
 
-                @Bindable var hotkeyService = appState.hotkeyService
-                Picker("Mode", selection: $hotkeyService.mode) {
-                    ForEach(RecordingMode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
+                        @Bindable var hotkeyService = appState.hotkeyService
+                        GlassSegmentedPicker(
+                            selection: $hotkeyService.mode,
+                            options: RecordingMode.allCases
+                        ) { mode in
+                            Text(mode.rawValue)
+                        }
+
+                        Text(hotkeyDescription)
+                            .font(.caption)
+                            .foregroundStyle(GlassDesign.Colors.textTertiary)
                     }
                 }
-                .pickerStyle(.segmented)
 
-                Text(hotkeyDescription)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+                // Auto-segment section only visible when Toggle Mode is enabled
+                if appState.hotkeyService.mode == .toggle {
+                    GlassSection(title: "Auto-Segment", icon: "waveform.badge.mic") {
+                        VStack(alignment: .leading, spacing: GlassDesign.Spacing.sm) {
+                            GlassToggle(
+                                "Enable Auto-Segment",
+                                isOn: Binding(
+                                    get: { segmentMode == SegmentMode.auto.rawValue },
+                                    set: { segmentMode = $0 ? SegmentMode.auto.rawValue : SegmentMode.manual.rawValue }
+                                )
+                            )
 
-            // Auto-segment section only visible when Toggle Mode is enabled (UAT Test 8)
-            if appState.hotkeyService.mode == .toggle {
-                Section("Auto-Segment") {
-                    // Toggle switch instead of picker (UAT Test 9 - no redundant Manual option)
-                    Toggle("Enable Auto-Segment", isOn: Binding(
-                        get: { segmentMode == SegmentMode.auto.rawValue },
-                        set: { segmentMode = $0 ? SegmentMode.auto.rawValue : SegmentMode.manual.rawValue }
-                    ))
+                            if segmentMode == SegmentMode.auto.rawValue {
+                                GlassSlider(
+                                    value: $silenceThreshold,
+                                    range: 1.0...5.0,
+                                    step: 0.5,
+                                    title: "Silence Threshold",
+                                    valueLabel: String(format: "%.1fs", silenceThreshold)
+                                )
 
-                    if segmentMode == SegmentMode.auto.rawValue {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("Silence Threshold")
-                                Spacer()
-                                Text(String(format: "%.1fs", silenceThreshold))
+                                Text("Time of silence before auto-inserting text. Shorter = faster, longer = fewer interruptions.")
+                                    .font(.caption)
+                                    .foregroundStyle(GlassDesign.Colors.textTertiary)
+                            }
+
+                            Text(segmentModeDescription)
+                                .font(.caption)
+                                .foregroundStyle(GlassDesign.Colors.textTertiary)
+                        }
+                    }
+                }
+
+                // Language Section
+                GlassSection(title: "Language", icon: "globe") {
+                    VStack(alignment: .leading, spacing: GlassDesign.Spacing.sm) {
+                        GlassSegmentedPicker(
+                            selection: $languageMode,
+                            options: LanguageMode.allCases.map { $0.rawValue }
+                        ) { mode in
+                            Text(mode)
+                        }
+
+                        HStack {
+                            Text("Cycle Language")
+                                .font(.system(size: 13))
+                            Spacer()
+                            KeyboardShortcuts.Recorder(for: .cycleLanguage)
+                        }
+
+                        Text("Auto-detect or force specific language. Cycle with hotkey.")
+                            .font(.caption)
+                            .foregroundStyle(GlassDesign.Colors.textTertiary)
+                    }
+                }
+
+                // Translation Section
+                GlassSection(title: "Translation", icon: "character.bubble") {
+                    VStack(alignment: .leading, spacing: GlassDesign.Spacing.sm) {
+                        GlassToggle("Translate to English", isOn: $translateMode)
+
+                        Text("Vietnamese speech will be translated to English text. Works offline using Whisper's built-in translation.")
+                            .font(.caption)
+                            .foregroundStyle(GlassDesign.Colors.textTertiary)
+                    }
+                }
+
+                // Translation Hotkey Section
+                GlassSection(title: "Translation Hotkey", icon: "globe.badge.chevron.backward") {
+                    VStack(alignment: .leading, spacing: GlassDesign.Spacing.sm) {
+                        HStack {
+                            Text("Translate Selection")
+                                .font(.system(size: 13))
+                            Spacer()
+                            KeyboardShortcuts.Recorder(for: .translateSelection)
+                        }
+
+                        Text("Select text and press the hotkey to translate. Works with any selected text in any application.")
+                            .font(.caption)
+                            .foregroundStyle(GlassDesign.Colors.textTertiary)
+                    }
+                }
+
+                // Model Section
+                GlassSection(title: "Model", icon: "cpu") {
+                    VStack(alignment: .leading, spacing: GlassDesign.Spacing.sm) {
+                        // Model picker
+                        Picker("Model Size", selection: Binding(
+                            get: { appState.modelManager.selectedModel },
+                            set: { newValue in
+                                Task {
+                                    try? await appState.modelManager.switchModel(to: newValue)
+                                }
+                            }
+                        )) {
+                            ForEach(ModelManager.availableModels) { model in
+                                HStack {
+                                    Text(model.name)
+                                    Spacer()
+                                    Text(model.size)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .tag(model.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .disabled(appState.modelManager.isLoading || appState.modelManager.isDownloading)
+
+                        // Status row showing current state
+                        HStack(spacing: GlassDesign.Spacing.xs) {
+                            if appState.modelManager.isModelLoaded {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                Text("Loaded")
+                                    .foregroundStyle(.secondary)
+                            } else if appState.modelManager.isDownloading {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text(appState.modelManager.loadProgress)
+                                    .foregroundStyle(.secondary)
+                            } else if appState.modelManager.isLoading {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text("Loading...")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Image(systemName: "arrow.down.circle")
+                                    .foregroundStyle(.blue)
+                                Text("Downloads on first use")
                                     .foregroundStyle(.secondary)
                             }
-                            Slider(value: $silenceThreshold, in: 1.0...5.0, step: 0.5)
                         }
+                        .font(.system(size: 12))
 
-                        Text("Time of silence before auto-inserting text. Shorter = faster insertion, longer = fewer interruptions.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Text(segmentModeDescription)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Section("Language") {
-                Picker("Language Mode", selection: $languageMode) {
-                    ForEach(LanguageMode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode.rawValue)
-                    }
-                }
-                .pickerStyle(.segmented)
-
-                KeyboardShortcuts.Recorder("Cycle Language:", name: .cycleLanguage)
-
-                Text("Auto-detect or force specific language. Cycle with hotkey.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Translation") {
-                Toggle("Translate to English", isOn: $translateMode)
-
-                Text("When enabled, Vietnamese speech will be translated to English text. Works offline using Whisper's built-in translation.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Translation Hotkey") {
-                KeyboardShortcuts.Recorder("Translate Selection:", name: .translateSelection)
-
-                Text("Select text and press the hotkey to translate. Works with any selected text in any application.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Model") {
-                Picker("Model Size", selection: Binding(
-                    get: { appState.modelManager.selectedModel },
-                    set: { newValue in
-                        Task {
-                            try? await appState.modelManager.switchModel(to: newValue)
-                        }
-                    }
-                )) {
-                    ForEach(ModelManager.availableModels) { model in
-                        HStack {
-                            Text(model.name)
-                            Spacer()
-                            Text(model.size)
-                                .foregroundStyle(.secondary)
-                        }
-                        .tag(model.id)
-                    }
-                }
-                .disabled(appState.modelManager.isLoading || appState.modelManager.isDownloading)
-
-                // Status row showing current state
-                HStack {
-                    if appState.modelManager.isModelLoaded {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                        Text("Loaded")
-                            .foregroundStyle(.secondary)
-                    } else if appState.modelManager.isDownloading {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text(appState.modelManager.loadProgress)
-                            .foregroundStyle(.secondary)
-                    } else if appState.modelManager.isLoading {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("Loading...")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Image(systemName: "arrow.down.circle")
-                            .foregroundStyle(.blue)
-                        Text("Downloads on first use")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                // Download progress bar
-                if appState.modelManager.isDownloading {
-                    ProgressView(value: appState.modelManager.downloadProgress)
-                    Text("Downloading: \(Int(appState.modelManager.downloadProgress * 100))%")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Model description
-                if let modelInfo = appState.modelManager.currentModelInfo {
-                    Text(modelInfo.description)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                if let error = appState.modelManager.loadError {
-                    Text(error.localizedDescription)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                }
-            }
-
-            Section("Permissions") {
-                PermissionRow(
-                    title: "Microphone",
-                    description: "Required for voice recording",
-                    isGranted: micStatus == .authorized,
-                    action: {
-                        if micStatus == .notDetermined {
-                            Task {
-                                _ = await appState.permissionManager.requestMicrophonePermission()
-                                refreshPermissions()
+                        // Download progress bar
+                        if appState.modelManager.isDownloading {
+                            VStack(alignment: .leading, spacing: GlassDesign.Spacing.xxs) {
+                                ProgressView(value: appState.modelManager.downloadProgress)
+                                    .tint(.accentColor)
+                                Text("Downloading: \(Int(appState.modelManager.downloadProgress * 100))%")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
-                        } else {
-                            appState.permissionManager.openMicrophoneSettings()
                         }
-                    }
-                )
 
-                PermissionRow(
-                    title: "Accessibility",
-                    description: "Required for text insertion and global hotkey",
-                    isGranted: accessibilityGranted,
-                    action: {
-                        if !accessibilityGranted {
-                            appState.permissionManager.requestAccessibilityPermission()
-                        } else {
-                            appState.permissionManager.openAccessibilitySettings()
+                        // Model description
+                        if let modelInfo = appState.modelManager.currentModelInfo {
+                            Text(modelInfo.description)
+                                .font(.caption)
+                                .foregroundStyle(GlassDesign.Colors.textTertiary)
+                        }
+
+                        if let error = appState.modelManager.loadError {
+                            Text(error.localizedDescription)
+                                .font(.caption)
+                                .foregroundStyle(.red)
                         }
                     }
-                )
+                }
+
+                // Permissions Section
+                GlassSection(title: "Permissions", icon: "lock.shield.fill") {
+                    VStack(spacing: GlassDesign.Spacing.sm) {
+                        GlassPermissionRow(
+                            title: "Microphone",
+                            description: "Required for voice recording",
+                            isGranted: micStatus == .authorized,
+                            action: {
+                                if micStatus == .notDetermined {
+                                    Task {
+                                        _ = await appState.permissionManager.requestMicrophonePermission()
+                                        refreshPermissions()
+                                    }
+                                } else {
+                                    appState.permissionManager.openMicrophoneSettings()
+                                }
+                            }
+                        )
+
+                        Divider()
+                            .background(GlassDesign.Colors.glassBorderSubtle)
+
+                        GlassPermissionRow(
+                            title: "Accessibility",
+                            description: "Required for text insertion and global hotkey",
+                            isGranted: accessibilityGranted,
+                            action: {
+                                if !accessibilityGranted {
+                                    appState.permissionManager.requestAccessibilityPermission()
+                                } else {
+                                    appState.permissionManager.openAccessibilitySettings()
+                                }
+                            }
+                        )
+                    }
+                }
             }
+            .padding(GlassDesign.Spacing.lg)
         }
-        .formStyle(.grouped)
     }
 
     @ViewBuilder
@@ -227,10 +277,10 @@ struct SettingsView: View {
             HistoryView()
                 .modelContainer(container)
         } else {
-            ContentUnavailableView(
-                "History Unavailable",
-                systemImage: "exclamationmark.triangle",
-                description: Text("Failed to load history database")
+            GlassEmptyState(
+                icon: "exclamationmark.triangle",
+                title: "History Unavailable",
+                description: "Failed to load history database"
             )
         }
     }
@@ -259,37 +309,5 @@ struct SettingsView: View {
             }
         }
         return ""
-    }
-}
-
-struct PermissionRow: View {
-    let title: String
-    let description: String
-    let isGranted: Bool
-    let action: () -> Void
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                Text(description)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            if isGranted {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            } else {
-                Button("Grant") {
-                    action()
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-            }
-        }
-        .padding(.vertical, 4)
     }
 }

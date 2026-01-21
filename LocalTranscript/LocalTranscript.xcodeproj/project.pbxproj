@@ -36,6 +36,8 @@
 		A1000030001 /* AsyncQueue in Frameworks */ = {isa = PBXBuildFile; productRef = A1000030000 /* AsyncQueue */; };
 		A1000031001 /* SegmentMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000031000 /* SegmentMode.swift */; };
 		A1000032001 /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000032000 /* TranslationService.swift */; };
+		A1000033001 /* GlassDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000033000 /* GlassDesign.swift */; };
+		A1000034001 /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000034000 /* GlassComponents.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +69,8 @@
 		A1000028000 /* TranscriptionQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionQueue.swift; sourceTree = "<group>"; };
 		A1000031000 /* SegmentMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentMode.swift; sourceTree = "<group>"; };
 		A1000032000 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
+		A1000033000 /* GlassDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassDesign.swift; sourceTree = "<group>"; };
+		A1000034000 /* GlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassComponents.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +127,8 @@
 				A1000013000 /* FloatingIndicator.swift */,
 				A1000014000 /* StatusIndicatorPanel.swift */,
 				A1000025000 /* HistoryView.swift */,
+				A1000033000 /* GlassDesign.swift */,
+				A1000034000 /* GlassComponents.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -271,6 +277,8 @@
 				A1000028001 /* TranscriptionQueue.swift in Sources */,
 				A1000031001 /* SegmentMode.swift in Sources */,
 				A1000032001 /* TranslationService.swift in Sources */,
+				A1000033001 /* GlassDesign.swift in Sources */,
+				A1000034001 /* GlassComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

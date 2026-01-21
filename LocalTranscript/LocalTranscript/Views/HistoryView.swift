@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import AppKit
 
 struct HistoryView: View {
     @Query(sort: \TranscriptionRecord.timestamp, order: .reverse)
@@ -10,84 +11,163 @@ struct HistoryView: View {
     var body: some View {
         Group {
             if records.isEmpty {
-                ContentUnavailableView(
-                    "No Transcriptions",
-                    systemImage: "text.bubble",
-                    description: Text("Your transcription history will appear here")
+                GlassEmptyState(
+                    icon: "text.bubble",
+                    title: "No Transcriptions",
+                    description: "Your transcription history will appear here"
                 )
             } else {
                 VStack(spacing: 0) {
-                    List {
-                        ForEach(records) { record in
-                            HistoryRow(record: record)
+                    ScrollView {
+                        LazyVStack(spacing: GlassDesign.Spacing.sm) {
+                            ForEach(records) { record in
+                                GlassHistoryCard(record: record)
+                                    .contextMenu {
+                                        Button {
+                                            copyToClipboard(record.text)
+                                        } label: {
+                                            Label("Copy", systemImage: "doc.on.doc")
+                                        }
+
+                                        Button(role: .destructive) {
+                                            withAnimation {
+                                                modelContext.delete(record)
+                                            }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                            }
                         }
-                        .onDelete(perform: deleteRecords)
+                        .padding(GlassDesign.Spacing.md)
                     }
 
-                    Divider()
+                    // Footer with clear button
+                    VStack(spacing: 0) {
+                        Divider()
+                            .background(GlassDesign.Colors.glassBorderSubtle)
 
-                    Button(role: .destructive) {
-                        appState.historyManager.clearAll()
-                    } label: {
-                        Label("Clear All", systemImage: "trash")
+                        GlassClearButton {
+                            appState.historyManager.clearAll()
+                        }
+                        .padding(GlassDesign.Spacing.sm)
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.red)
-                    .padding(8)
+                    .background(.ultraThinMaterial)
                 }
             }
         }
     }
 
-    private func deleteRecords(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(records[index])
-        }
+    private func copyToClipboard(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
     }
 }
 
-struct HistoryRow: View {
+// MARK: - Glass History Card
+
+struct GlassHistoryCard: View {
     let record: TranscriptionRecord
-    @State private var isCopied = false
+    @State private var isHovered = false
+    @State private var showCopiedFeedback = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: GlassDesign.Spacing.xs) {
+            // Main text
             Text(record.text)
+                .font(.system(size: 13))
                 .lineLimit(3)
+                .foregroundStyle(GlassDesign.Colors.textPrimary)
 
-            HStack {
-                Text(record.timestamp, style: .relative)
-                Text("-")
-                Text(record.languageMode)
-                if record.duration > 0 {
-                    Text("-")
-                    Text(String(format: "%.1fs", record.duration))
+            // Metadata row
+            HStack(spacing: GlassDesign.Spacing.xs) {
+                // Timestamp
+                HStack(spacing: 4) {
+                    Image(systemName: "clock")
+                        .font(.system(size: 10))
+                    Text(record.timestamp, style: .relative)
                 }
+                .foregroundStyle(GlassDesign.Colors.textTertiary)
+
+                Text("•")
+                    .foregroundStyle(GlassDesign.Colors.textTertiary)
+
+                // Language badge
+                LanguageBadge(mode: record.languageMode)
+
+                // Duration
+                if record.duration > 0 {
+                    Text("•")
+                        .foregroundStyle(GlassDesign.Colors.textTertiary)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "timer")
+                            .font(.system(size: 10))
+                        Text(String(format: "%.1fs", record.duration))
+                    }
+                    .foregroundStyle(GlassDesign.Colors.textTertiary)
+                }
+
+                // Translation badge
                 if record.wasTranslated {
-                    Text("EN")
-                        .font(.caption2)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
-                        .background(Color.blue)
-                        .clipShape(Capsule())
+                    TranslationBadge()
+                }
+
+                Spacer()
+
+                // Copy button (appears on hover)
+                if isHovered {
+                    Button {
+                        copyToClipboard()
+                    } label: {
+                        Image(systemName: showCopiedFeedback ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(showCopiedFeedback ? .green : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity.combined(with: .scale(scale: 0.8)))
                 }
             }
             .font(.caption)
-            .foregroundStyle(.secondary)
         }
-        .contextMenu {
-            Button {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(record.text, forType: .string)
-                isCopied = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    isCopied = false
-                }
-            } label: {
-                Label(isCopied ? "Copied!" : "Copy", systemImage: "doc.on.doc")
+        .padding(GlassDesign.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: GlassDesign.CornerRadius.card)
+                .fill(isHovered ? .regularMaterial : .thinMaterial)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: GlassDesign.CornerRadius.card)
+                .stroke(
+                    isHovered ? GlassDesign.Colors.glassBorder : GlassDesign.Colors.glassBorderSubtle,
+                    lineWidth: isHovered ? 1 : 0.5
+                )
+        }
+        .shadow(
+            color: isHovered ? .black.opacity(0.1) : .black.opacity(0.05),
+            radius: isHovered ? 8 : 4,
+            x: 0,
+            y: isHovered ? 4 : 2
+        )
+        .scaleEffect(isHovered ? 1.005 : 1.0)
+        .animation(GlassDesign.Animation.medium, value: isHovered)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+
+    private func copyToClipboard() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(record.text, forType: .string)
+
+        withAnimation(GlassDesign.Animation.fast) {
+            showCopiedFeedback = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation {
+                showCopiedFeedback = false
             }
         }
-        .padding(.vertical, 4)
     }
 }
