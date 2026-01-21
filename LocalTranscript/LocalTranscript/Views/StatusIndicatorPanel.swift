@@ -101,6 +101,12 @@ class StatusIndicatorPanel: NSPanel {
 
         case .segmentDetected:
             configureSegmentDetectedState()
+
+        case .translating:
+            configureTranslatingState()
+
+        case .translated(let text):
+            configureTranslatedState(text: text)
         }
 
         // Schedule auto-dismiss if needed
@@ -241,6 +247,40 @@ class StatusIndicatorPanel: NSPanel {
         iconView.frame.origin.y = 8
 
         resizePanel(width: Self.minWidth + 20, height: Self.baseHeight)
+    }
+
+    private func configureTranslatingState() {
+        // Globe icon for translation in progress
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        let image = NSImage(systemSymbolName: "globe", accessibilityDescription: "Translating")
+        iconView.image = image?.withSymbolConfiguration(config)
+        iconView.contentTintColor = .systemBlue
+
+        textLabel.stringValue = "Translating..."
+        progressBar.isHidden = true
+
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
+        resizePanel(width: Self.minWidth + 10, height: Self.baseHeight)
+    }
+
+    private func configureTranslatedState(text: String) {
+        // Checkmark icon for translation completed
+        let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        let image = NSImage(systemSymbolName: "checkmark.circle.fill", accessibilityDescription: "Translated")
+        iconView.image = image?.withSymbolConfiguration(config)
+        iconView.contentTintColor = .systemGreen
+
+        textLabel.stringValue = "Translated"
+        progressBar.isHidden = true
+
+        // Reset positions
+        textLabel.frame.origin.y = 8
+        iconView.frame.origin.y = 8
+
+        resizePanel(width: Self.minWidth, height: Self.baseHeight)
     }
 
     // MARK: - Layout Helpers
