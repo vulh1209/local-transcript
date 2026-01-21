@@ -1,0 +1,169 @@
+import Foundation
+import Translation
+import AppKit
+import os.log
+
+private let logger = Logger(subsystem: "com.voicetype.localtranscript", category: "TranslationService")
+
+@Observable
+class TranslationService {
+    enum TranslationState: Equatable {
+        case idle
+        case translating
+        case completed(String)
+        case error(TranslationError)
+    }
+
+    enum TranslationError: LocalizedError, Equatable {
+        case noTextSelected
+        case accessibilityNotGranted
+        case languagePacksNotInstalled
+        case translationFailed(String)
+        case textTooLong
+
+        var errorDescription: String? {
+            switch self {
+            case .noTextSelected:
+                return "No text selected"
+            case .accessibilityNotGranted:
+                return "Accessibility permission required"
+            case .languagePacksNotInstalled:
+                return "Language packs not installed. Go to System Settings > Translation Languages"
+            case .translationFailed(let message):
+                return "Translation failed: \(message)"
+            case .textTooLong:
+                return "Selected text is too long"
+            }
+        }
+    }
+
+    private(set) var state: TranslationState = .idle
+    private(set) var lastTranslation: String = ""
+
+    /// Maximum text length to translate (10KB as per spec edge cases)
+    private let maxTextLength: Int = 10_000
+
+    private let textInsertionService: TextInsertionService
+    @ObservationIgnored private var statusPanel: StatusIndicatorPanel?
+
+    init(textInsertionService: TextInsertionService = TextInsertionService()) {
+        self.textInsertionService = textInsertionService
+    }
+
+    var isTranslating: Bool {
+        if case .translating = state { return true }
+        return false
+    }
+
+    // MARK: - Public Methods
+
+    /// Main entry point: translates currently selected text
+    /// Called by hotkey handler from AppState
+    @MainActor
+    func translateSelection() async {
+        logger.info("translateSelection called, current state: \(String(describing: self.state))")
+
+        // Ignore if already translating (concurrent request protection per spec edge cases)
+        guard !isTranslating else {
+            logger.info("Already translating, ignoring request")
+            return
+        }
+
+        // Reset from previous completed/error states
+        state = .idle
+
+        // Read selected text via Accessibility API
+        guard let selectedText = textInsertionService.getSelectedText() else {
+            logger.warning("No text selected")
+            showStatusPanel(.error(message: TranslationError.noTextSelected.localizedDescription))
+            state = .error(.noTextSelected)
+            return
+        }
+
+        // Check text length (edge case: very long text)
+        guard selectedText.count <= maxTextLength else {
+            logger.warning("Text too long: \(selectedText.count) chars, max \(self.maxTextLength)")
+            showStatusPanel(.error(message: TranslationError.textTooLong.localizedDescription))
+            state = .error(.textTooLong)
+            return
+        }
+
+        logger.info("Selected text: '\(selectedText.prefix(50))...' (\(selectedText.count) chars)")
+
+        // Show translating status
+        showStatusPanel(.translating)
+        state = .translating
+
+        do {
+            // Check language pack availability (to be implemented in subtask-5-2)
+            try await checkLanguageAvailability()
+
+            // Perform translation (to be implemented in subtask-5-3)
+            let translatedText = try await translate(text: selectedText)
+
+            logger.info("Translation result: '\(translatedText.prefix(50))...'")
+            lastTranslation = translatedText
+            state = .completed(translatedText)
+
+            // Show success indicator
+            showStatusPanel(.translated(translatedText))
+
+            // Insert translated text at cursor (replaces selection)
+            try await textInsertionService.insertText(translatedText)
+            logger.info("Translated text inserted successfully")
+
+        } catch let error as TranslationError {
+            logger.error("Translation error: \(error.localizedDescription)")
+            showStatusPanel(.error(message: error.localizedDescription))
+            state = .error(error)
+        } catch {
+            logger.error("Unexpected translation error: \(error.localizedDescription)")
+            let translationError = TranslationError.translationFailed(error.localizedDescription)
+            showStatusPanel(.error(message: translationError.localizedDescription))
+            state = .error(translationError)
+        }
+    }
+
+    /// Reset to idle state
+    func reset() {
+        state = .idle
+    }
+
+    // MARK: - Language Availability (subtask-5-2)
+
+    /// Checks if English and Vietnamese language packs are installed
+    /// Throws TranslationError.languagePacksNotInstalled if not available
+    private func checkLanguageAvailability() async throws {
+        // Placeholder: will be implemented in subtask-5-2
+        // For now, assume language packs are available
+        logger.info("Checking language availability (placeholder)")
+    }
+
+    // MARK: - Translation (subtask-5-3)
+
+    /// Performs bidirectional EN<->VI translation with auto-detection
+    /// Uses Apple Translation framework
+    private func translate(text: String) async throws -> String {
+        // Placeholder: will be implemented in subtask-5-3
+        // For now, return the original text
+        logger.info("Translating text (placeholder)")
+        return text
+    }
+
+    // MARK: - Status Panel Management
+
+    @MainActor
+    private func showStatusPanel(_ state: StatusIndicatorState) {
+        if statusPanel == nil {
+            statusPanel = StatusIndicatorPanel()
+        }
+        statusPanel?.updateState(state)
+        statusPanel?.orderFront(nil)
+    }
+
+    @MainActor
+    private func hideStatusPanel() {
+        statusPanel?.close()
+        statusPanel = nil
+    }
+}
