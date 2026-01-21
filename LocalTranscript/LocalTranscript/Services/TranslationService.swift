@@ -134,9 +134,27 @@ class TranslationService {
     /// Checks if English and Vietnamese language packs are installed
     /// Throws TranslationError.languagePacksNotInstalled if not available
     private func checkLanguageAvailability() async throws {
-        // Placeholder: will be implemented in subtask-5-2
-        // For now, assume language packs are available
-        logger.info("Checking language availability (placeholder)")
+        logger.info("Checking language availability for EN↔VI translation")
+
+        let availability = LanguageAvailability()
+        let english = Locale.Language(identifier: "en")
+        let vietnamese = Locale.Language(identifier: "vi")
+
+        // Check EN → VI availability
+        let enToViStatus = await availability.status(from: english, to: vietnamese)
+        logger.info("EN→VI status: \(String(describing: enToViStatus))")
+
+        // Check VI → EN availability
+        let viToEnStatus = await availability.status(from: vietnamese, to: english)
+        logger.info("VI→EN status: \(String(describing: viToEnStatus))")
+
+        // Both directions must be installed for bidirectional translation
+        guard enToViStatus == .installed && viToEnStatus == .installed else {
+            logger.warning("Language packs not installed. EN→VI: \(String(describing: enToViStatus)), VI→EN: \(String(describing: viToEnStatus))")
+            throw TranslationError.languagePacksNotInstalled
+        }
+
+        logger.info("Language packs verified: EN↔VI available")
     }
 
     // MARK: - Translation (subtask-5-3)
