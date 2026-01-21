@@ -2,10 +2,48 @@ import Foundation
 import Translation
 import NaturalLanguage
 import AppKit
+import SwiftUI
 import os.log
 
 private let logger = Logger(subsystem: "com.voicetype.localtranscript", category: "TranslationService")
 
+/// Helper view that uses translationTask to perform translations
+/// The Translation framework requires SwiftUI to obtain a TranslationSession
+@available(macOS 15.0, *)
+private struct TranslationHelper: View {
+    let text: String
+    let sourceLanguage: Locale.Language
+    let targetLanguage: Locale.Language
+    let onComplete: (Result<String, Error>) -> Void
+
+    @State private var configuration: TranslationSession.Configuration?
+
+    var body: some View {
+        Color.clear
+            .frame(width: 1, height: 1)
+            .translationTask(configuration) { session in
+                do {
+                    let response = try await session.translate(text)
+                    await MainActor.run {
+                        onComplete(.success(response.targetText))
+                    }
+                } catch {
+                    await MainActor.run {
+                        onComplete(.failure(error))
+                    }
+                }
+            }
+            .onAppear {
+                // Trigger translation by setting the configuration
+                configuration = TranslationSession.Configuration(
+                    source: sourceLanguage,
+                    target: targetLanguage
+                )
+            }
+    }
+}
+
+@available(macOS 15.0, *)
 @Observable
 class TranslationService {
     enum TranslationState: Equatable {
@@ -162,6 +200,7 @@ class TranslationService {
 
     /// Performs bidirectional EN<->VI translation with auto-detection
     /// Uses Apple Translation framework with NLLanguageRecognizer for language detection
+    @MainActor
     private func translate(text: String) async throws -> String {
         logger.info("Starting translation for text (\(text.count) chars)")
 
@@ -191,23 +230,42 @@ class TranslationService {
             logger.info("Translation direction: EN → VI")
         }
 
-        // Create translation configuration with explicit source and target
-        // Using explicit languages instead of nil for source to avoid short-text detection issues
-        let configuration = TranslationSession.Configuration(
-            source: sourceLanguage,
-            target: targetLanguage
-        )
+        // Use a continuation to bridge between SwiftUI's translationTask and our async method
+        return try await withCheckedThrowingContinuation { continuation in
+            // Create a temporary window to host the translation helper view
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 1, height: 1),
+                styleMask: [],
+                backing: .buffered,
+                defer: false
+            )
+            window.isOpaque = false
+            window.backgroundColor = .clear
+            window.level = .floating
+            window.ignoresMouseEvents = true
 
-        do {
-            // Create TranslationSession and perform translation
-            let session = try await TranslationSession(configuration: configuration)
-            let response = try await session.translate(text)
+            var hasCompleted = false
 
-            logger.info("Translation completed: '\(response.targetText.prefix(50))...'")
-            return response.targetText
-        } catch {
-            logger.error("TranslationSession error: \(error.localizedDescription)")
-            throw TranslationError.translationFailed(error.localizedDescription)
+            let helperView = TranslationHelper(
+                text: text,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage
+            ) { result in
+                guard !hasCompleted else { return }
+                hasCompleted = true
+                window.close()
+                switch result {
+                case .success(let translatedText):
+                    logger.info("Translation completed: '\(translatedText.prefix(50))...'")
+                    continuation.resume(returning: translatedText)
+                case .failure(let error):
+                    logger.error("TranslationSession error: \(error.localizedDescription)")
+                    continuation.resume(throwing: TranslationError.translationFailed(error.localizedDescription))
+                }
+            }
+
+            window.contentView = NSHostingView(rootView: helperView)
+            window.orderFront(nil)
         }
     }
 
