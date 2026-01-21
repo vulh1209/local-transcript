@@ -81,5 +81,13 @@ class AppState {
                 await self.transcriptionService.stopRecording()
             }
         )
+
+        // Bind translation hotkey (requires macOS 15.0+)
+        if #available(macOS 15.0, *) {
+            hotkeyService.bindTranslation(onTranslate: { [weak self] in
+                guard let self else { return }
+                await self.translationService.translateSelection()
+            })
+        }
     }
 }
