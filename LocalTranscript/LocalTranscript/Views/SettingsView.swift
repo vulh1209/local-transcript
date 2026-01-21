@@ -111,6 +111,14 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Translation Hotkey") {
+                KeyboardShortcuts.Recorder("Translate Selection:", name: .translateSelection)
+
+                Text("Select text and press the hotkey to translate. Works with any selected text in any application.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Model") {
                 Picker("Model Size", selection: Binding(
                     get: { appState.modelManager.selectedModel },
